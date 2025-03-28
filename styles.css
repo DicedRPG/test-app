@@ -200,6 +200,11 @@ body {
 }
 
 /* Quest System Styles */
+#quest-list {
+    width: 100%;
+    display: block;
+}
+
 .quest-card {
     background-color: white;
     padding: 20px;
@@ -298,7 +303,7 @@ body {
 
 .quest-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 16px;
     width: 100%;
 }
@@ -314,6 +319,7 @@ body {
 
 /* Quest type color indicators */
 .quest-item {
+    width: 100%;
     position: relative;
     padding-top: 6px;
     overflow: hidden;
@@ -469,6 +475,7 @@ body {
 
 /* Quest filter styles */
 .filter-container {
+    width: 100%;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -522,8 +529,8 @@ body {
 }
 
 .quest-list-compact {
-    display: flex;
-    flex-direction: column;
+    display: block;
+    /*flex-direction: column;*/
     gap: 8px;
     width: 100%;
 }
