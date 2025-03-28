@@ -274,194 +274,250 @@ const questSystem = {
         return questItem;
     },
     
-    showQuestDetails(quest) {
-        const questList = document.getElementById('quest-list');
-        const currentQuest = document.getElementById('current-quest');
-        
-        if (!questList || !currentQuest) return;
-        
-        // Get completion info
-        const state = store.getState();
-        const completions = state.completedQuests.filter(c => c.questId === quest.id);
-        const completionCount = completions.length;
-        
-        // Show quest details, hide list
-        questList.classList.add('hidden');
-        currentQuest.classList.remove('hidden');
-        
-        // Update current quest in state
-        store.updateState('currentQuest', quest.id);
-        
-        // Quest type color
-        const questColor = QUEST_TYPE_COLORS[quest.type] || '#888888';
-        
-        // Build details HTML
-        currentQuest.innerHTML = `
-            <div class="quest-details">
-                <div class="quest-type-banner-large" style="background-color: ${questColor}"></div>
-                <div class="quest-header">
-                    <div>
-                        <h4 class="text-xl font-bold mb-1">${quest.questName}</h4>
-                        <p class="text-sm text-gray-600">
-                            ${quest.rank} • <span class="quest-type-text" style="color: ${questColor}">${quest.type}</span>
-                            ${completionCount > 0 ? `
-                                <span class="completed-text">
-                                    • Completed ${completionCount} time${completionCount > 1 ? 's' : ''}
-                                </span>
-                            ` : ''}
-                        </p>
+    // app.js - Enhanced quest display functions
+
+// Extend the showQuestDetails function to handle detailed quest information
+showQuestDetails(quest) {
+    const questList = document.getElementById('quest-list');
+    const currentQuest = document.getElementById('current-quest');
+    
+    if (!questList || !currentQuest) return;
+    
+    // Get completion info
+    const state = store.getState();
+    const completions = state.completedQuests.filter(c => c.questId === quest.id);
+    const completionCount = completions.length;
+    
+    // Show quest details, hide list
+    questList.classList.add('hidden');
+    currentQuest.classList.remove('hidden');
+    
+    // Update current quest in state
+    store.updateState('currentQuest', quest.id);
+    
+    // Quest type color
+    const questColor = QUEST_TYPE_COLORS[quest.type] || '#888888';
+    
+    // Build the basic details HTML
+    currentQuest.innerHTML = `
+        <div class="quest-details">
+            <div class="quest-type-banner-large" style="background-color: ${questColor}"></div>
+            
+            <div class="quest-header">
+                <div>
+                    <h2 class="quest-title">${quest.questName}</h2>
+                    <p class="quest-meta">
+                        Stage ${quest.stageId || '?'}: ${quest.stageName || 'Unknown'} • 
+                        <span class="quest-type-text" style="color: ${questColor}">${quest.type}</span>
+                        ${completionCount > 0 ? `
+                            <span class="completed-text">
+                                • Completed ${completionCount} time${completionCount > 1 ? 's' : ''}
+                            </span>
+                        ` : ''}
+                    </p>
+                </div>
+                ${quest.diceRequired ? `
+                    <div class="quest-dice-required">
+                        <span>🎲</span>
+                        Dice Roll Required
                     </div>
-                    ${quest.diceRequired ? `
-                        <div class="quest-dice-required">
-                            <span>🎲</span>
-                            Dice Roll Required
+                ` : ''}
+            </div>
+            
+            <div class="quest-description">
+                <p>${quest.description}</p>
+            </div>
+            
+            <div class="quest-focus-grid">
+                <div class="focus-box primary">
+                    <p class="focus-label">Primary Focus</p>
+                    <p class="focus-value">${quest.primaryFocus} • ${quest.primaryHours}h</p>
+                </div>
+                <div class="focus-box secondary">
+                    <p class="focus-label">Secondary Focus</p>
+                    <p class="focus-value">${quest.secondaryFocus} • ${quest.secondaryHours}h</p>
+                </div>
+            </div>
+            
+            ${this.buildDetailedQuestContent(quest)}
+            
+            ${quest.diceRequired ? this.buildDiceRollSection(quest) : ''}
+            
+            <div class="quest-actions">
+                <button id="back-to-quest-list" class="quest-button secondary">
+                    Back to Quest List
+                </button>
+                <button id="start-quest-button" class="quest-button primary">
+                    ${quest.diceRequired && !this.hasRolledDice(quest.id) 
+                        ? 'Roll Dice & Start Quest' 
+                        : 'Start Quest'}
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Add event listeners
+    document.getElementById('back-to-quest-list').addEventListener('click', () => {
+        this.showQuestList();
+    });
+    
+    document.getElementById('start-quest-button').addEventListener('click', () => {
+        if (quest.diceRequired && !this.hasRolledDice(quest.id)) {
+            this.rollDiceForQuest(quest);
+        } else {
+            this.showCookingMode(quest);
+        }
+    });
+    
+    // Add expand/collapse functionality to sections
+    document.querySelectorAll('.section-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const content = header.nextElementSibling;
+            content.classList.toggle('collapsed');
+            header.classList.toggle('collapsed');
+        });
+    });
+},
+
+// Build the enhanced content sections
+buildDetailedQuestContent(quest) {
+    if (!quest.learningObjectives && !quest.equipmentNeeded && !quest.contentSections) {
+        return ''; // No enhanced content available
+    }
+    
+    let html = '<div class="detailed-quest-content">';
+    
+    // Learning Objectives
+    if (quest.learningObjectives && quest.learningObjectives.length > 0) {
+        html += `
+            <div class="quest-section">
+                <h3 class="section-header">Learning Objectives</h3>
+                <div class="section-content">
+                    <ul class="objective-list">
+                        ${quest.learningObjectives.map(obj => `<li>${obj}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Equipment Needed
+    if (quest.equipmentNeeded && quest.equipmentNeeded.length > 0) {
+        html += `
+            <div class="quest-section">
+                <h3 class="section-header">Equipment Needed</h3>
+                <div class="section-content">
+                    <ul class="equipment-list">
+                        ${quest.equipmentNeeded.map(item => `<li>${item}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Content Sections
+    if (quest.contentSections && quest.contentSections.length > 0) {
+        html += `
+            <div class="quest-section">
+                <h3 class="section-header">Instructions</h3>
+                <div class="section-content">
+                    ${quest.contentSections.map(section => `
+                        <div class="content-section">
+                            <h4 class="content-section-title">${section.title}</h4>
+                            ${section.subsections.map(subsection => `
+                                <div class="content-subsection">
+                                    <h5 class="subsection-title">${subsection.subtitle}</h5>
+                                    <div class="subsection-content">
+                                        <p>${subsection.content}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
                         </div>
-                    ` : ''}
-                </div>
-                
-                <p class="text-gray-700 mb-4">${quest.description}</p>
-                
-                <div class="quest-focus-grid">
-                    <div class="focus-box primary">
-                        <p class="text-sm font-semibold text-blue-700">Primary Focus</p>
-                        <p class="text-lg">${quest.primaryFocus} • ${quest.primaryHours}h</p>
-                    </div>
-                    <div class="focus-box secondary">
-                        <p class="text-sm font-semibold text-green-700">Secondary Focus</p>
-                        <p class="text-lg">${quest.secondaryFocus} • ${quest.secondaryHours}h</p>
-                    </div>
-                </div>
-                
-                ${quest.diceRequired ? this.buildDiceRollSection(quest) : ''}
-                
-                <div class="mt-6 flex justify-between">
-                    <button id="back-to-quest-list" 
-                        class="quest-button secondary">
-                        Back to List
-                    </button>
-                    <button id="start-quest-button"
-                        class="quest-button primary">
-                        ${quest.diceRequired && !this.hasRolledDice(quest.id) 
-                            ? 'Roll Dice & Start Quest' 
-                            : 'Start Quest'}
-                    </button>
+                    `).join('')}
                 </div>
             </div>
         `;
-        
-        // Add event listeners
-        document.getElementById('back-to-quest-list').addEventListener('click', () => {
-            this.showQuestList();
-        });
-        
-        document.getElementById('start-quest-button').addEventListener('click', () => {
-            if (quest.diceRequired && !this.hasRolledDice(quest.id)) {
-                this.rollDiceForQuest(quest);
-            } else {
-                this.showCookingMode(quest);
-            }
-        });
-    },
+    }
     
-    hasRolledDice(questId) {
-        const state = store.getState();
-        return state.questRolls && state.questRolls[questId];
-    },
-    
-    buildDiceRollSection(quest) {
-        const state = store.getState();
-        const rolls = state.questRolls && state.questRolls[quest.id];
-        
-        if (!rolls) {
-            return `
-                <div class="dice-roll-section">
-                    <h4>Dice Roll Required</h4>
-                    <p>This quest requires dice rolls to determine specific elements.</p>
+    // Practical Exercises
+    if (quest.practicalExercises && quest.practicalExercises.length > 0) {
+        html += `
+            <div class="quest-section">
+                <h3 class="section-header">Practical Exercises</h3>
+                <div class="section-content">
+                    ${quest.practicalExercises.map(exercise => `
+                        <div class="exercise">
+                            <h4 class="exercise-title">${exercise.title}</h4>
+                            <ol class="exercise-steps">
+                                ${exercise.steps.map(step => `<li>${step}</li>`).join('')}
+                            </ol>
+                        </div>
+                    `).join('')}
                 </div>
-            `;
-        }
-        
-        // Show rolled results
-        let rollHtml = `
-            <div class="dice-roll-section">
-                <h4>Your Roll Results</h4>
-                <ul class="dice-results">
-        `;
-        
-        for (const [key, value] of Object.entries(rolls)) {
-            rollHtml += `<li><strong>${key}:</strong> ${value}</li>`;
-        }
-        
-        rollHtml += `
-                </ul>
             </div>
         `;
-        
-        return rollHtml;
-    },
+    }
     
-    rollDiceForQuest(quest) {
-        if (!quest.diceRequired) return;
-        
-        // Define possible roll options
-        const rollOptions = {
-            'Protein Type': ['Chicken', 'Beef', 'Pork', 'Tofu', 'Shrimp'],
-            'Sauce Style': ['Tomato Basil', 'Alfredo', 'Pesto', 'Garlic Butter', 'Spicy Arrabbiata'],
-            'Knife Type': ['Chef\'s Knife', 'Santoku', 'Utility Knife', 'Paring Knife'],
-            'Cutting Style': ['Julienne', 'Brunoise', 'Chiffonade', 'Batonnet']
-        };
-        
-        // Figure out what we need to roll for
-        const rollTypes = [];
-        if (quest.description.includes('protein')) rollTypes.push('Protein Type');
-        if (quest.description.includes('sauce')) rollTypes.push('Sauce Style');
-        if (quest.description.includes('knife')) rollTypes.push('Knife Type');
-        if (quest.description.includes('cut')) rollTypes.push('Cutting Style');
-        
-        // If no specific types found, pick random ones based on focus
-        if (rollTypes.length === 0) {
-            if (quest.primaryFocus === 'Technique') {
-                rollTypes.push('Knife Type', 'Cutting Style');
-            } else if (quest.primaryFocus === 'Flavor') {
-                rollTypes.push('Sauce Style', 'Protein Type');
-            } else {
-                // Default to protein and sauce
-                rollTypes.push('Protein Type', 'Sauce Style');
-            }
-        }
-        
-        // Roll the dice!
-        const rollResults = {};
-        
-        rollTypes.forEach(type => {
-            const options = rollOptions[type] || [];
-            if (options.length > 0) {
-                const randomIndex = Math.floor(Math.random() * options.length);
-                rollResults[type] = options[randomIndex];
-            }
+    // Tips for Success
+    if (quest.tipsForSuccess && quest.tipsForSuccess.length > 0) {
+        html += `
+            <div class="quest-section">
+                <h3 class="section-header">Tips for Success</h3>
+                <div class="section-content">
+                    <ul class="tips-list">
+                        ${quest.tipsForSuccess.map(tip => `<li>${tip}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Completion Checklist
+    if (quest.completionChecklist && quest.completionChecklist.length > 0) {
+        html += `
+            <div class="quest-section">
+                <h3 class="section-header">Completion Checklist</h3>
+                <div class="section-content">
+                    <div class="checklist">
+                        ${quest.completionChecklist.map(item => `
+                            <div class="checklist-item">
+                                <input type="checkbox" id="check-${item.replace(/\s+/g, '-')}" class="checklist-checkbox">
+                                <label for="check-${item.replace(/\s+/g, '-')}">${item}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    return html;
+},
+
+// Enhanced cooking mode to include step-by-step guidance
+showCookingMode(quest) {
+    const currentQuest = document.getElementById('current-quest');
+    if (!currentQuest) return;
+    
+    // Get dice rolls if applicable
+    const state = store.getState();
+    const rolls = state.questRolls && state.questRolls[quest.id] || {};
+    
+    // Prepare cooking steps
+    let steps = [];
+    
+    // Use the contentSections from enhanced quest data if available
+    if (quest.contentSections && quest.contentSections.length > 0) {
+        // Transform content sections into cooking steps
+        steps = quest.contentSections.map(section => {
+            return {
+                title: section.title,
+                instructions: section.subsections.map(subsection => subsection.subtitle)
+            };
         });
-        
-        // Save the results
-        const state = store.getState();
-        const questRolls = {...state.questRolls, [quest.id]: rollResults};
-        store.updateState('questRolls', questRolls);
-        
-        // Show the updated quest details
-        this.showQuestDetails(quest);
-    },
-    
-    showCookingMode(quest) {
-        // Simplified cooking mode for HTML version
-        const currentQuest = document.getElementById('current-quest');
-        if (!currentQuest) return;
-        
-        // Get dice rolls if applicable
-        const state = store.getState();
-        const rolls = state.questRolls && state.questRolls[quest.id] || {};
-        
-        // Set basic cooking steps based on quest type
-        let steps = [];
-        
+    } else {
+        // Fallback to generic steps based on quest type
         if (quest.type === 'Main') {
             steps = [
                 { title: 'Preparation', instructions: ['Gather all ingredients', 'Prepare your workspace'] },
@@ -479,110 +535,220 @@ const questSystem = {
                 { title: 'Practice', instructions: ['Practice the technique described'] }
             ];
         }
-        
-        // Show cooking mode UI
-        currentQuest.innerHTML = `
-            <div class="cooking-mode">
-                <div class="cooking-header">
-                    <h3>${quest.questName}</h3>
-                    <p>Follow these steps to complete your quest</p>
+    }
+    
+    // Show cooking mode UI
+    currentQuest.innerHTML = `
+        <div class="cooking-mode">
+            <div class="cooking-header">
+                <h2>${quest.questName}</h2>
+                <p>Follow these steps to complete your quest</p>
+            </div>
+            
+            ${Object.keys(rolls).length > 0 ? `
+                <div class="roll-results">
+                    <h3>Your Roll Results:</h3>
+                    <ul>
+                        ${Object.entries(rolls).map(([key, value]) => 
+                            `<li><strong>${key}:</strong> ${value}</li>`
+                        ).join('')}
+                    </ul>
                 </div>
-                
-                ${Object.keys(rolls).length > 0 ? `
-                    <div class="roll-results">
-                        <h4>Your Roll Results:</h4>
-                        <ul>
-                            ${Object.entries(rolls).map(([key, value]) => 
-                                `<li><strong>${key}:</strong> ${value}</li>`
-                            ).join('')}
-                        </ul>
-                    </div>
-                ` : ''}
-                
-                <div class="cooking-steps">
+            ` : ''}
+            
+            <div class="cooking-steps-container">
+                <div class="cooking-steps-nav">
                     ${steps.map((step, index) => `
-                        <div class="cooking-step">
-                            <h4>Step ${index + 1}: ${step.title}</h4>
-                            <ul>
-                                ${step.instructions.map(instruction => 
-                                    `<li>${instruction}</li>`
-                                ).join('')}
-                            </ul>
+                        <div class="step-nav-item" data-step="${index}">
+                            <div class="step-number">${index + 1}</div>
+                            <div class="step-nav-title">${step.title}</div>
                         </div>
                     `).join('')}
                 </div>
                 
-                <div class="cooking-actions">
-                    <button id="back-to-details" class="quest-button secondary">Back</button>
-                    <button id="complete-quest" class="quest-button primary">Complete Quest</button>
+                <div class="cooking-steps-content">
+                    ${steps.map((step, index) => `
+                        <div class="cooking-step" data-step="${index}" ${index > 0 ? 'style="display: none;"' : ''}>
+                            <h3>Step ${index + 1}: ${step.title}</h3>
+                            <div class="step-instructions">
+                                <ul>
+                                    ${step.instructions.map(instruction => 
+                                        `<li class="instruction-item">
+                                            <input type="checkbox" class="instruction-checkbox">
+                                            <span class="instruction-text">${instruction}</span>
+                                        </li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                            
+                            ${index < steps.length - 1 ? `
+                                <button class="next-step-button quest-button primary">Next Step</button>
+                            ` : ''}
+                            
+                            ${index > 0 ? `
+                                <button class="prev-step-button quest-button secondary">Previous Step</button>
+                            ` : ''}
+                        </div>
+                    `).join('')}
                 </div>
             </div>
-        `;
-        
-        // Add event listeners
-        document.getElementById('back-to-details').addEventListener('click', () => {
-            this.showQuestDetails(quest);
-        });
-        
-        document.getElementById('complete-quest').addEventListener('click', () => {
-            this.showCompletionScreen(quest);
-        });
-    },
+            
+            <div class="cooking-actions">
+                <button id="back-to-details" class="quest-button secondary">Back to Details</button>
+                <button id="complete-quest" class="quest-button primary">Complete Quest</button>
+            </div>
+        </div>
+    `;
     
-    showCompletionScreen(quest) {
-        // Honor system completion
-        const currentQuest = document.getElementById('current-quest');
-        if (!currentQuest) return;
-        
-        currentQuest.innerHTML = `
-            <div class="quest-completion">
-                <h3>Quest Complete: ${quest.questName}</h3>
+    // Add event listeners
+    document.getElementById('back-to-details').addEventListener('click', () => {
+        this.showQuestDetails(quest);
+    });
+    
+    document.getElementById('complete-quest').addEventListener('click', () => {
+        this.showCompletionScreen(quest);
+    });
+    
+    // Add navigation functionality
+    document.querySelectorAll('.next-step-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const currentStep = button.closest('.cooking-step');
+            const stepIndex = parseInt(currentStep.dataset.step);
+            const nextStep = document.querySelector(`.cooking-step[data-step="${stepIndex + 1}"]`);
+            
+            currentStep.style.display = 'none';
+            nextStep.style.display = 'block';
+            
+            // Update nav highlight
+            document.querySelectorAll('.step-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`.step-nav-item[data-step="${stepIndex + 1}"]`).classList.add('active');
+        });
+    });
+    
+    document.querySelectorAll('.prev-step-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const currentStep = button.closest('.cooking-step');
+            const stepIndex = parseInt(currentStep.dataset.step);
+            const prevStep = document.querySelector(`.cooking-step[data-step="${stepIndex - 1}"]`);
+            
+            currentStep.style.display = 'none';
+            prevStep.style.display = 'block';
+            
+            // Update nav highlight
+            document.querySelectorAll('.step-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`.step-nav-item[data-step="${stepIndex - 1}"]`).classList.add('active');
+        });
+    });
+    
+    // Make step nav items clickable
+    document.querySelectorAll('.step-nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const stepIndex = parseInt(item.dataset.step);
+            
+            // Hide all steps
+            document.querySelectorAll('.cooking-step').forEach(step => {
+                step.style.display = 'none';
+            });
+            
+            // Show selected step
+            document.querySelector(`.cooking-step[data-step="${stepIndex}"]`).style.display = 'block';
+            
+            // Update nav highlight
+            document.querySelectorAll('.step-nav-item').forEach(navItem => {
+                navItem.classList.remove('active');
+            });
+            item.classList.add('active');
+        });
+    });
+    
+    // Highlight first step nav item
+    document.querySelector('.step-nav-item[data-step="0"]').classList.add('active');
+},
+    
+// Enhanced completion screen with checklist review
+showCompletionScreen(quest) {
+    // Honor system completion
+    const currentQuest = document.getElementById('current-quest');
+    if (!currentQuest) return;
+    
+    // Get completion checklist
+    const checklist = quest.completionChecklist || [];
+    
+    currentQuest.innerHTML = `
+        <div class="quest-completion">
+            <h2>Quest Complete: ${quest.questName}</h2>
+            
+            <div class="completion-assessment">
+                <h3>How did it go?</h3>
                 
-                <div class="completion-assessment">
-                    <h4>How did it go?</h4>
+                <div class="completion-options">
+                    <label class="completion-option">
+                        <input type="radio" name="completion-level" value="mastered" checked>
+                        <span>Mastered it! (100% reward)</span>
+                    </label>
                     
-                    <div class="completion-options">
-                        <label class="completion-option">
-                            <input type="radio" name="completion-level" value="mastered" checked>
-                            <span>Mastered it! (100% reward)</span>
-                        </label>
-                        
-                        <label class="completion-option">
-                            <input type="radio" name="completion-level" value="wellDone">
-                            <span>Did well, need practice (80% reward)</span>
-                        </label>
-                        
-                        <label class="completion-option">
-                            <input type="radio" name="completion-level" value="struggled">
-                            <span>Struggled but completed (60% reward)</span>
-                        </label>
+                    <label class="completion-option">
+                        <input type="radio" name="completion-level" value="wellDone">
+                        <span>Did well, need practice (80% reward)</span>
+                    </label>
+                    
+                    <label class="completion-option">
+                        <input type="radio" name="completion-level" value="struggled">
+                        <span>Struggled but completed (60% reward)</span>
+                    </label>
+                </div>
+            </div>
+            
+            ${checklist.length > 0 ? `
+                <div class="completion-checklist">
+                    <h3>Completion Checklist Review</h3>
+                    <p>Check off the items you completed:</p>
+                    <div class="checklist-review">
+                        ${checklist.map((item, index) => `
+                            <div class="checklist-review-item">
+                                <input type="checkbox" id="complete-check-${index}" class="checklist-checkbox">
+                                <label for="complete-check-${index}">${item}</label>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
-                
-                <div class="completion-notes">
-                    <h4>Notes (optional):</h4>
-                    <textarea id="completion-notes" placeholder="Add your reflections here..."></textarea>
-                </div>
-                
-                <div class="completion-actions">
-                    <button id="back-to-cooking" class="quest-button secondary">Back</button>
-                    <button id="confirm-completion" class="quest-button primary">Confirm Completion</button>
-                </div>
-            </div>
-        `;
-        
-        // Add event listeners
-        document.getElementById('back-to-cooking').addEventListener('click', () => {
-            this.showCookingMode(quest);
-        });
-        
-        document.getElementById('confirm-completion').addEventListener('click', () => {
-            const completionLevel = document.querySelector('input[name="completion-level"]:checked').value;
-            const notes = document.getElementById('completion-notes').value;
+            ` : ''}
             
-            this.completeQuest(quest, completionLevel, notes);
+            <div class="completion-notes">
+                <h3>Notes (optional):</h3>
+                <textarea id="completion-notes" placeholder="Add your reflections here..."></textarea>
+            </div>
+            
+            <div class="completion-actions">
+                <button id="back-to-cooking" class="quest-button secondary">Back</button>
+                <button id="confirm-completion" class="quest-button primary">Confirm Completion</button>
+            </div>
+        </div>
+    `;
+    
+    // Add event listeners
+    document.getElementById('back-to-cooking').addEventListener('click', () => {
+        this.showCookingMode(quest);
+    });
+    
+    document.getElementById('confirm-completion').addEventListener('click', () => {
+        const completionLevel = document.querySelector('input[name="completion-level"]:checked').value;
+        const notes = document.getElementById('completion-notes').value;
+        
+        // Gather checked items from checklist
+        const checkedItems = [];
+        document.querySelectorAll('.checklist-review-item input:checked').forEach(checkbox => {
+            const label = checkbox.nextElementSibling.textContent;
+            checkedItems.push(label);
         });
-    },
+        
+        this.completeQuest(quest, completionLevel, notes, checkedItems);
+    });
+},
     
     completeQuest(quest, completionLevel = 'mastered', notes = '') {
         // Calculate rewards based on completion level
