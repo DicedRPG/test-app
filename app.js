@@ -1,5 +1,89 @@
-// app.js - Main application for DICED app
+// app.js - Main application for DICED app with compatibility for both modes
 console.log("Loading main application module...");
+
+// Define a simple store implementation to mimic the original store
+// This ensures backward compatibility
+const store = {
+  _state: {
+    attributeHours: {
+      technique: 0,
+      management: 0,
+      flavor: 0,
+      ingredients: 0
+    },
+    completedQuests: [],
+    visibleQuests: [],
+    lastUpdate: new Date().toISOString()
+  },
+  
+  getState() {
+    return {...this._state};
+  },
+  
+  updateState(path, value) {
+    // Handle dot notation paths (e.g., 'attributeHours.technique')
+    const parts = path.split('.');
+    let current = this._state;
+    const lastKey = parts.pop();
+    
+    for (const key of parts) {
+      if (current[key] === undefined) {
+        current[key] = {};
+      }
+      current = current[key];
+    }
+    
+    current[lastKey] = value;
+    this._saveToStorage();
+    this._notifyListeners();
+  },
+  
+  _listeners: [],
+  
+  subscribe(listener) {
+    this._listeners.push(listener);
+    return () => {
+      this._listeners = this._listeners.filter(l => l !== listener);
+    };
+  },
+  
+  _notifyListeners() {
+    this._listeners.forEach(listener => listener(this._state));
+  },
+  
+  _saveToStorage() {
+    try {
+      this._state.lastUpdate = new Date().toISOString();
+      localStorage.setItem('diced_rpg_state', JSON.stringify(this._state));
+    } catch (error) {
+      console.error('Failed to save state:', error);
+    }
+  },
+  
+  loadFromStorage() {
+    try {
+      const saved = localStorage.getItem('diced_rpg_state');
+      if (saved) {
+        const parsedState = JSON.parse(saved);
+        // Merge with initial state to ensure all properties exist
+        this._state = {
+          ...this._state,
+          ...parsedState,
+          attributeHours: {
+            ...this._state.attributeHours,
+            ...(parsedState.attributeHours || {})
+          }
+        };
+        this._notifyListeners();
+      }
+    } catch (error) {
+      console.error('Failed to load state:', error);
+    }
+  }
+};
+
+// Make store globally available
+window.store = store;
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', async () => {
@@ -46,6 +130,8 @@ async function initializeDatabaseMode() {
     // Initialize quest system if available
     if (typeof window.questSystem !== 'undefined') {
       await window.questSystem.initialize();
+    } else if (typeof questSystem !== 'undefined') {
+      questSystem.initialize();
     } else {
       console.log("Quest system not available in database mode");
     }
@@ -72,8 +158,14 @@ function initializeLocalStorageMode() {
     questSystem.initialize();
   }
   
-  // Update displays
-  updateDisplay();
+  // Call original update function if available
+  if (typeof updateDisplay === 'function') {
+    updateDisplay();
+  } else {
+    // Basic update for attributes
+    const state = store.getState();
+    updateBasicDisplay(state.attributeHours);
+  }
   
   console.log("localStorage mode initialization complete");
   return true;
@@ -134,7 +226,7 @@ function handleAddHours() {
   const attribute = document.getElementById('attribute-select').value;
   const hours = parseFloat(document.getElementById('hours-input').value);
   
-  if (hours <= 0) {
+  if (isNaN(hours) || hours <= 0) {
     alert('Please enter a valid number of hours');
     return;
   }
@@ -146,6 +238,15 @@ function handleAddHours() {
   
   // Reset input
   document.getElementById('hours-input').value = '1';
+  
+  // Call original update function if available
+  if (typeof updateDisplay === 'function') {
+    updateDisplay();
+  } else {
+    // Basic update for attributes
+    const updatedState = store.getState();
+    updateBasicDisplay(updatedState.attributeHours);
+  }
 }
 
 // Handle adjusting hours with database
@@ -194,7 +295,7 @@ async function handleDatabaseAdjustHours() {
 function handleAdjustHours() {
   const attribute = document.getElementById('attribute-select').value;
   const currentState = store.getState();
-  const currentHours = currentState.attributeHours[attribute];
+  const currentHours = currentState.attributeHours[attribute] || 0;
   
   const newHours = prompt(
     `Current hours for ${attribute}: ${currentHours}\nEnter new total hours:`,
@@ -211,11 +312,34 @@ function handleAdjustHours() {
   
   if (confirm(`Are you sure you want to set ${attribute} to ${newHoursNum} hours?`)) {
     store.updateState(`attributeHours.${attribute}`, newHoursNum);
+    
+    // Call original update function if available
+    if (typeof updateDisplay === 'function') {
+      updateDisplay();
+    } else {
+      // Basic update for attributes
+      const updatedState = store.getState();
+      updateBasicDisplay(updatedState.attributeHours);
+    }
   }
 }
 
 // Update attribute displays with database data
 function updateAttributeDisplays(attributeHours) {
+  updateBasicDisplay(attributeHours);
+  
+  // Call original updateDisplay if available, for other elements
+  if (typeof updateDisplay === 'function') {
+    try {
+      updateDisplay();
+    } catch (error) {
+      console.warn("Error in original updateDisplay function:", error);
+    }
+  }
+}
+
+// Basic display update for attributes (works in both modes)
+function updateBasicDisplay(attributeHours) {
   // Update each attribute display
   const attributes = ['technique', 'management', 'flavor', 'ingredients'];
   let totalHours = 0;
@@ -229,18 +353,12 @@ function updateAttributeDisplays(attributeHours) {
     if (hoursElement) {
       hoursElement.textContent = hours.toFixed(1);
     }
-    
-    // Update other elements as needed
-    // ...
   });
   
-  // Call original updateDisplay if available, for other elements
-  if (typeof updateDisplay === 'function') {
-    try {
-      updateDisplay();
-    } catch (error) {
-      console.warn("Error in original updateDisplay function:", error);
-    }
+  // Update total hours if element exists
+  const overallHoursElement = document.getElementById('overall-hours');
+  if (overallHoursElement) {
+    overallHoursElement.textContent = totalHours.toFixed(1);
   }
 }
 
