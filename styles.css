@@ -922,3 +922,230 @@ body {
     color: #e67e22;
     margin-left: 8px;
 }
+
+/* Enhanced quest detail styles */
+.detailed-quest-content {
+  margin-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 20px;
+}
+
+.quest-section {
+  margin-bottom: 24px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.section-header {
+  background-color: #f5f5f5;
+  padding: 12px 16px;
+  font-size: 16px;
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-header::after {
+  content: "▼";
+  font-size: 12px;
+  transition: transform 0.3s;
+}
+
+.section-header.collapsed::after {
+  transform: rotate(-90deg);
+}
+
+.section-content {
+  padding: 16px;
+  border-top: 1px solid #e0e0e0;
+  max-height: 800px;
+  overflow: auto;
+  transition: max-height 0.3s, opacity 0.3s;
+}
+
+.section-content.collapsed {
+  max-height: 0;
+  padding: 0 16px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.objective-list li,
+.equipment-list li,
+.tips-list li {
+  margin-bottom: 8px;
+}
+
+.content-section {
+  margin-bottom: 20px;
+}
+
+.content-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--primary-color);
+}
+
+.content-subsection {
+  margin-bottom: 16px;
+  padding-left: 16px;
+  border-left: 3px solid #e0e0e0;
+}
+
+.subsection-title {
+  font-size: 16px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.subsection-content {
+  line-height: 1.5;
+}
+
+.exercise {
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.exercise-title {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.exercise-steps {
+  padding-left: 24px;
+}
+
+.exercise-steps li {
+  margin-bottom: 8px;
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checklist-checkbox {
+  width: 18px;
+  height: 18px;
+}
+
+/* Cooking mode enhancements */
+.cooking-steps-container {
+  display: flex;
+  margin: 24px 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cooking-steps-nav {
+  width: 30%;
+  min-width: 180px;
+  background-color: #f5f5f5;
+  border-right: 1px solid #e0e0e0;
+}
+
+.step-nav-item {
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.step-nav-item:hover {
+  background-color: #ebebeb;
+}
+
+.step-nav-item.active {
+  background-color: #e0e0e0;
+  font-weight: 600;
+}
+
+.step-number {
+  width: 28px;
+  height: 28px;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.cooking-steps-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.cooking-step {
+  animation: fadeIn 0.3s;
+}
+
+.step-instructions {
+  margin: 20px 0;
+}
+
+.instruction-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.instruction-checkbox {
+  margin-top: 4px;
+}
+
+.instruction-text {
+  flex: 1;
+}
+
+.next-step-button,
+.prev-step-button {
+  margin-top: 16px;
+}
+
+/* Completion screen enhancements */
+.completion-checklist {
+  margin: 24px 0;
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.checklist-review {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.checklist-review-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
