@@ -343,7 +343,7 @@ showQuestDetails(quest) {
             
             ${quest.diceRequired ? this.buildDiceRollSection(quest) : ''}
             
-            <div class="quest-actions">
+            <div class="quest-screen-actions">
                 <button id="back-to-quest-list" class="quest-button secondary">
                     Back to Quest List
                 </button>
