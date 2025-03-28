@@ -1184,3 +1184,31 @@ font-size: 14px;
 transition: background-color 0.2s;
 }
 
+@media (max-width: 768px) {
+.cooking-steps-container {
+flex-direction: column; / Stack steps vertically */
+}
+
+.cooking-steps-nav {
+    width: 100%; /* Full width for navigation */
+    border-right: none; /* Remove right border */
+    border-bottom: 1px solid #e0e0e0; /* Add bottom border for separation */
+    display: flex;
+    flex-wrap: wrap; /* Allow steps to wrap if many */
+    max-height: none; /* Remove any height restrictions */
+}
+
+.step-nav-item {
+    flex: 1 1 auto; /* Allow items to grow and wrap */
+    min-width: 150px; /* Minimum width for touch targets */
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.cooking-steps-content {
+    width: 100%; /* Full width for content */
+    padding: 15px; /* Adjust padding for mobile */
+}
+
+.cooking-step {
+    padding: 10px; /* Slightly less padding on mobile */
+}
