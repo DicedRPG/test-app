@@ -107,4 +107,6 @@ const QUEST_DATA = [
     ]
   },
   // Additional quests would follow the same structure
+// Add this at the end of data.js or after QUEST_DATA is defined
+console.log("QUEST_DATA available:", QUEST_DATA ? `${QUEST_DATA.length} quests found` : "Not found");
 ];
