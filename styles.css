@@ -295,6 +295,7 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 16px;
+    width: 100%;
 }
 
 .quest-item {
@@ -523,6 +524,8 @@ body {
 }
 
 .quest-list-item {
+    width: 100%;
+    box-sizing: border-box;
     border: 1px solid var(--border-color);
     border-radius: 6px;
     margin-bottom: 8px;
