@@ -1,12 +1,23 @@
-// db.js - Database management module
+// db.js - Database foundation for DICED app
+console.log("Loading database module...");
 
+// Database configuration
+const DB_NAME = "DicedRPG";
+const DB_VERSION = 1;
+const STORES = {
+  ATTRIBUTE_HOURS: "attributeHours"
+};
+
+// Database management class
 class DicedDatabase {
   constructor() {
     this.db = null;
     this.isInitializing = false;
     this.initCallbacks = [];
+    console.log("DicedDatabase instance created");
   }
 
+  // Initialize the database
   async init() {
     if (this.db) return this.db;
     if (this.isInitializing) {
@@ -16,18 +27,23 @@ class DicedDatabase {
       });
     }
 
+    console.log("Initializing database...");
     this.isInitializing = true;
     
     return new Promise((resolve, reject) => {
+      // Open the IndexedDB database
       const request = indexedDB.open(DB_NAME, DB_VERSION);
       
+      // Handle errors
       request.onerror = event => {
         console.error("Database error:", event.target.error);
         this.isInitializing = false;
         reject(event.target.error);
       };
       
+      // Handle successful opening
       request.onsuccess = event => {
+        console.log("Database opened successfully");
         this.db = event.target.result;
         this.isInitializing = false;
         
@@ -38,51 +54,21 @@ class DicedDatabase {
         resolve(this.db);
       };
       
+      // Handle database upgrades
       request.onupgradeneeded = event => {
+        console.log("Database upgrade needed, creating stores...");
         const db = event.target.result;
         
-        // Create object stores if they don't exist
-        if (!db.objectStoreNames.contains(STORES.QUESTS)) {
-          const questStore = db.createObjectStore(STORES.QUESTS, { keyPath: "id" });
-          questStore.createIndex("stageId", "stageId", { unique: false });
-          questStore.createIndex("type", "type", { unique: false });
-          questStore.createIndex("rank", "rank", { unique: false });
-        }
-        
-        if (!db.objectStoreNames.contains(STORES.QUEST_DETAILS)) {
-          db.createObjectStore(STORES.QUEST_DETAILS, { keyPath: "questId" });
-        }
-        
-        if (!db.objectStoreNames.contains(STORES.QUEST_STAGES)) {
-          const stageStore = db.createObjectStore(STORES.QUEST_STAGES, { keyPath: "id" });
-          stageStore.createIndex("recommendedOrder", "recommendedOrder", { unique: false });
-        }
-        
-        if (!db.objectStoreNames.contains(STORES.USER_PROGRESS)) {
-          const progressStore = db.createObjectStore(STORES.USER_PROGRESS, { keyPath: ["questId", "userId"] });
-          progressStore.createIndex("userId", "userId", { unique: false });
-        }
-        
+        // Create attribute hours store if it doesn't exist
         if (!db.objectStoreNames.contains(STORES.ATTRIBUTE_HOURS)) {
           db.createObjectStore(STORES.ATTRIBUTE_HOURS, { keyPath: "attribute" });
+          console.log("Created attribute hours store");
         }
       };
     });
   }
 
-  // Generic CRUD operations
-  async add(storeName, data) {
-    const db = await this.init();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, "readwrite");
-      const store = transaction.objectStore(storeName);
-      const request = store.add(data);
-      
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-  
+  // Basic get operation
   async get(storeName, key) {
     const db = await this.init();
     return new Promise((resolve, reject) => {
@@ -95,25 +81,33 @@ class DicedDatabase {
     });
   }
   
-  async getAll(storeName, indexName = null, query = null) {
+  // Basic getAll operation
+  async getAll(storeName) {
     const db = await this.init();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(storeName, "readonly");
       const store = transaction.objectStore(storeName);
-      
-      let request;
-      if (indexName && query !== null) {
-        const index = store.index(indexName);
-        request = index.getAll(query);
-      } else {
-        request = store.getAll();
-      }
+      const request = store.getAll();
       
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
   }
   
+  // Basic add operation
+  async add(storeName, data) {
+    const db = await this.init();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(storeName, "readwrite");
+      const store = transaction.objectStore(storeName);
+      const request = store.add(data);
+      
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+  
+  // Basic update operation
   async update(storeName, data) {
     const db = await this.init();
     return new Promise((resolve, reject) => {
@@ -125,46 +119,8 @@ class DicedDatabase {
       request.onerror = () => reject(request.error);
     });
   }
-  
-  async delete(storeName, key) {
-    const db = await this.init();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, "readwrite");
-      const store = transaction.objectStore(storeName);
-      const request = store.delete(key);
-      
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-  
-  async bulkAdd(storeName, items) {
-    const db = await this.init();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, "readwrite");
-      const store = transaction.objectStore(storeName);
-      
-      let completed = 0;
-      const total = items.length;
-      const results = [];
-      
-      transaction.oncomplete = () => resolve(results);
-      transaction.onerror = () => reject(transaction.error);
-      
-      items.forEach(item => {
-        const request = store.add(item);
-        request.onsuccess = () => {
-          results.push(request.result);
-          completed++;
-          
-          if (completed === total) {
-            resolve(results);
-          }
-        };
-      });
-    });
-  }
 }
 
-// Create and export a single instance
-const dicedDB = new DicedDatabase();
+// Create a global instance
+window.dicedDB = new DicedDatabase();
+console.log("Database module loaded, dicedDB object created");
