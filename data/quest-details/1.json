@@ -1,0 +1,56 @@
+{
+  "learningObjectives": [
+    "Understand fundamental food safety principles",
+    "Master proper handwashing and personal hygiene techniques",
+    "Learn to prevent cross-contamination between different food items",
+    "Develop proper cleaning routines for different kitchen surfaces and tools",
+    "Understand safe food storage temperatures and practices",
+    "Create systems for maintaining a clean, efficient kitchen workspace"
+  ],
+  "equipmentNeeded": [
+    "Cleaning supplies (dish soap, all-purpose cleaner, sanitizing solution)",
+    "Cleaning tools (scrub brushes, sponges, microfiber cloths)",
+    "Cutting boards (preferably multiple)",
+    "Storage containers"
+  ],
+  "contentSections": [
+    {
+      "title": "Kitchen Safety Fundamentals",
+      "subsections": [
+        {
+          "subtitle": "Personal Hygiene",
+          "content": "Proper handwashing is the foundation of kitchen safety. Follow this process: 1. Wet your hands with clean, running water (warm or cold) 2. Apply soap and lather by rubbing hands together 3. Scrub all surfaces for at least 20 seconds..."
+        },
+        {
+          "subtitle": "Cross-Contamination Prevention",
+          "content": "Cross-contamination occurs when harmful bacteria from one food item are transferred to another. Prevent this through separation strategies..."
+        }
+      ]
+    }
+  ],
+  "practicalExercises": [
+    {
+      "title": "Kitchen Safety Audit",
+      "steps": [
+        "Assess your current kitchen setup",
+        "Identify potential cross-contamination risks",
+        "Check for proper food storage",
+        "Evaluate cleaning product storage",
+        "Verify presence and location of safety equipment",
+        "Create an improvement action plan"
+      ]
+    }
+  ],
+  "completionChecklist": [
+    "Completed kitchen safety audit",
+    "Implemented refrigerator organization system",
+    "Created and posted cleaning schedule",
+    "Established color-coding system for cutting boards and cleaning tools",
+    "Set up proper cleaning supply storage"
+  ],
+  "tipsForSuccess": [
+    "Start with a complete clean of your kitchen before implementing new systems",
+    "Color-coding is one of the most effective ways to prevent cross-contamination",
+    "Clean as you go is easier than cleaning everything at the end"
+  ]
+}
