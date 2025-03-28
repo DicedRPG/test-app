@@ -172,34 +172,83 @@ async function initializeQuestDisplay() {
   }
 }
 
-// Function to set up quest UI
+// Updated setupQuestUI function
 function setupQuestUI(quests) {
+  console.log(`Setting up quest UI with ${quests.length} quests...`);
+  
   // Find the container for quests
-  const questContainer = document.querySelector('#quest-system .content');
-  if (!questContainer) {
-    console.error("Quest container not found");
-    return;
+  const questList = document.querySelector('#quest-list');
+  if (!questList) {
+    console.error("Quest list element not found");
+    // Try to find by other means
+    const questContainer = document.querySelector('#quest-system .content');
+    if (questContainer) {
+      console.log("Found quest container, adding quest list element");
+      const newQuestList = document.createElement('div');
+      newQuestList.id = 'quest-list';
+      questContainer.appendChild(newQuestList);
+    } else {
+      console.error("Cannot find quest container or list");
+      return;
+    }
   }
   
-  // Set up event listeners for quest buttons
-  const viewAllButton = document.getElementById('view-all');
+  // Set up event listeners for quest buttons - try multiple ways to find buttons
+  // First by ID
+  let viewAllButton = document.getElementById('view-all');
+  // If not found, try by text content
+  if (!viewAllButton) {
+    document.querySelectorAll('button').forEach(button => {
+      if (button.textContent.includes('View All')) {
+        viewAllButton = button;
+      }
+    });
+  }
+  
   if (viewAllButton) {
-    viewAllButton.addEventListener('click', () => showAllQuests(quests));
+    console.log("Found View All button");
+    viewAllButton.addEventListener('click', () => {
+      console.log("View All clicked");
+      showAllQuests(quests);
+    });
+  } else {
+    console.error("View All button not found");
   }
   
-  const randomQuestButton = document.getElementById('random-quest');
+  // Same for Random Quest button
+  let randomQuestButton = document.getElementById('random-quest');
+  if (!randomQuestButton) {
+    document.querySelectorAll('button').forEach(button => {
+      if (button.textContent.includes('Random Quest')) {
+        randomQuestButton = button;
+      }
+    });
+  }
+  
   if (randomQuestButton) {
-    randomQuestButton.addEventListener('click', () => showRandomQuest(quests));
+    console.log("Found Random Quest button");
+    randomQuestButton.addEventListener('click', () => {
+      console.log("Random Quest clicked");
+      showRandomQuest(quests);
+    });
+  } else {
+    console.error("Random Quest button not found");
   }
   
   // Show available quests
+  console.log("Displaying all quests...");
   showAllQuests(quests);
 }
 
 // Function to display all quests
 function showAllQuests(quests) {
+  console.log(`Showing all quests (${quests.length})...`);
+  
   const questList = document.querySelector('#quest-list');
-  if (!questList) return;
+  if (!questList) {
+    console.error("Quest list element not found when trying to show quests");
+    return;
+  }
   
   // Clear current content
   questList.innerHTML = '';
@@ -215,38 +264,13 @@ function showAllQuests(quests) {
   
   // Add each quest
   quests.forEach(quest => {
+    console.log(`Creating quest item for "${quest.questName}"`);
     const questItem = createQuestItem(quest);
     questGrid.appendChild(questItem);
   });
   
   questList.appendChild(questGrid);
-}
-
-// Function to create a quest item element
-function createQuestItem(quest) {
-  const questItem = document.createElement('div');
-  questItem.className = 'quest-item';
-  
-  // Color indicator based on quest type
-  const typeColor = QUEST_TYPE_COLORS[quest.type] || '#888888';
-  
-  questItem.innerHTML = `
-    <div class="quest-type-banner" style="background-color: ${typeColor};"></div>
-    <div class="quest-content">
-      <h4>${quest.questName}</h4>
-      <p>${quest.description}</p>
-      <div class="quest-details">
-        <span>${quest.primaryFocus}: ${quest.primaryHours}h</span>
-        <span>${quest.secondaryFocus}: ${quest.secondaryHours}h</span>
-        ${quest.diceRequired ? '<span class="dice-required">🎲</span>' : ''}
-      </div>
-    </div>
-  `;
-  
-  // Add click handler
-  questItem.addEventListener('click', () => showQuestDetails(quest));
-  
-  return questItem;
+  console.log("Quest list populated");
 }
 
 // Initialize with traditional localStorage approach
