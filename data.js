@@ -30,173 +30,81 @@ const LEVELS = [
 ];
 
 // Quest Data
+// Enhanced quest data structure
 const QUEST_DATA = [
-    {
-        id: 1,
-        questName: "Kitchen Safety & Cleaning",
-        rank: "Home Cook",
-        type: "Training",
-        primaryFocus: "Management",
-        secondaryFocus: "Technique",
-        primaryHours: 1,
-        secondaryHours: 0.5,
-        diceRequired: false,
-        description: "Learn safe food handling, cleaning, and cross-contamination prevention"
-    },
-    {
-        id: 2,
-        questName: "Basic Knife Skills I",
-        rank: "Home Cook",
-        type: "Training",
-        primaryFocus: "Technique",
-        secondaryFocus: "Management",
-        primaryHours: 1,
-        secondaryHours: 0.5,
-        diceRequired: false,
-        description: "Master basic vegetable cuts: rough chop, dice, and slice"
-    },
-    {
-        id: 3,
-        questName: "Mise en Place",
-        rank: "Home Cook",
-        type: "Training",
-        primaryFocus: "Management",
-        secondaryFocus: "Technique",
-        primaryHours: 1,
-        secondaryHours: 0.5,
-        diceRequired: false,
-        description: "Practice proper preparation and organization of ingredients"
-    },
-    {
-        id: 4,
-        questName: "Recipe Reading",
-        rank: "Home Cook",
-        type: "Training",
-        primaryFocus: "Management",
-        secondaryFocus: "Technique",
-        primaryHours: 1,
-        secondaryHours: 0.5,
-        diceRequired: false,
-        description: "Learn to read, understand, and follow basic recipes"
-    },
-    {
-        id: 5,
-        questName: "Basic Knife Skills II",
-        rank: "Home Cook",
-        type: "Training",
-        primaryFocus: "Technique",
-        secondaryFocus: "Management",
-        primaryHours: 1,
-        secondaryHours: 0.5,
-        diceRequired: false,
-        description: "Practice advanced cuts: julienne, brunoise, and chiffonade"
-    },
-    {
-        id: 10,
-        questName: "Boiling & Simmering",
-        rank: "Home Cook",
-        type: "Training",
-        primaryFocus: "Technique",
-        secondaryFocus: "Management",
-        primaryHours: 1,
-        secondaryHours: 0.5,
-        diceRequired: false,
-        description: "Master cooking grains, vegetables, and pasta in liquid"
-    },
-    {
-        id: 13,
-        questName: "Sautéing Basics",
-        rank: "Home Cook",
-        type: "Training",
-        primaryFocus: "Technique",
-        secondaryFocus: "Flavor",
-        primaryHours: 1,
-        secondaryHours: 0.5,
-        diceRequired: false,
-        description: "Learn proper sautéing technique using vegetables"
-    },
-    {
-        id: 45,
-        questName: "Simple Breakfast",
-        rank: "Home Cook",
-        type: "Main",
-        primaryFocus: "Technique",
-        secondaryFocus: "Management",
-        primaryHours: 1.5,
-        secondaryHours: 1,
-        diceRequired: true,
-        description: "Prepare eggs, toast, and a simple side"
-    },
-    {
-        id: 46,
-        questName: "Basic Sandwich Lunch",
-        rank: "Home Cook",
-        type: "Main",
-        primaryFocus: "Technique",
-        secondaryFocus: "Management",
-        primaryHours: 1.5,
-        secondaryHours: 1,
-        diceRequired: true,
-        description: "Construct a balanced sandwich with sides"
-    },
-    {
-        id: 47,
-        questName: "Easy Pasta Dinner",
-        rank: "Home Cook",
-        type: "Main",
-        primaryFocus: "Technique",
-        secondaryFocus: "Management",
-        primaryHours: 2,
-        secondaryHours: 1,
-        diceRequired: true,
-        description: "Cook a simple pasta dish with sauce and protein"
-    },
-    {
-        id: 76,
-        questName: "Simple Salad",
-        rank: "Home Cook",
-        type: "Side",
-        primaryFocus: "Technique",
-        secondaryFocus: "Flavor",
-        primaryHours: 1,
-        secondaryHours: 0.5,
-        diceRequired: true,
-        description: "Prepare a fresh salad with homemade dressing"
-    },
-    {
-        id: 77,
-        questName: "Basic Vegetable Side",
-        rank: "Home Cook",
-        type: "Side",
-        primaryFocus: "Technique",
-        secondaryFocus: "Flavor",
-        primaryHours: 1,
-        secondaryHours: 0.5,
-        diceRequired: true,
-        description: "Cook a simple vegetable side dish"
-    },
-    {
-        id: 103,
-        questName: "Basic Cookbook Research",
-        rank: "Home Cook",
-        type: "Explore",
-        primaryFocus: "Management",
-        secondaryFocus: "Technique",
-        primaryHours: 1,
-        secondaryHours: 0.5,
-        diceRequired: false,
-        description: "Study a cookbook and select three recipes to try"
-    },
-    {
-        id: 104,
-        questName: "Cooking YouTube Research",
-        rank: "Home Cook",
-        type: "Explore",
-        primaryFocus: "Technique",
-        secondaryFocus: "Management",
-        primaryHours: 1,
-        secondaryHours: 0.5,
-        diceRequired: false,
-        description: "Watch cooking tutorials and take notes on techniques"
-    }
+  {
+    id: 1,
+    questName: "Kitchen Safety & Cleaning",
+    rank: "Home Cook",
+    type: "Training",
+    primaryFocus: "Management",
+    secondaryFocus: "Technique",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Learn safe food handling cleaning and cross-contamination prevention",
+    
+    // Enhanced content
+    stageId: 1,
+    stageName: "Kitchen Fundamentals",
+    learningObjectives: [
+      "Understand fundamental food safety principles",
+      "Master proper handwashing and personal hygiene techniques",
+      "Learn to prevent cross-contamination between different food items",
+      "Develop proper cleaning routines for different kitchen surfaces and tools",
+      "Understand safe food storage temperatures and practices",
+      "Create systems for maintaining a clean, efficient kitchen workspace"
+    ],
+    equipmentNeeded: [
+      "Cleaning supplies (dish soap, all-purpose cleaner, sanitizing solution)",
+      "Cleaning tools (scrub brushes, sponges, microfiber cloths)",
+      "Cutting boards (preferably multiple)",
+      "Storage containers"
+    ],
+    contentSections: [
+      {
+        title: "Kitchen Safety Fundamentals",
+        subsections: [
+          {
+            subtitle: "Personal Hygiene",
+            content: "Proper handwashing is the foundation of kitchen safety. Follow this process: 1. Wet your hands with clean, running water (warm or cold) 2. Apply soap and lather by rubbing hands together 3. Scrub all surfaces for at least 20 seconds..."
+          },
+          {
+            subtitle: "Cross-Contamination Prevention",
+            content: "Cross-contamination occurs when harmful bacteria from one food item are transferred to another. Prevent this through separation strategies..."
+          }
+          // Additional subsections
+        ]
+      },
+      // Additional sections
+    ],
+    practicalExercises: [
+      {
+        title: "Kitchen Safety Audit",
+        steps: [
+          "Assess your current kitchen setup",
+          "Identify potential cross-contamination risks",
+          "Check for proper food storage",
+          "Evaluate cleaning product storage",
+          "Verify presence and location of safety equipment",
+          "Create an improvement action plan"
+        ]
+      }
+      // Additional exercises
+    ],
+    completionChecklist: [
+      "Completed kitchen safety audit",
+      "Implemented refrigerator organization system",
+      "Created and posted cleaning schedule",
+      "Established color-coding system for cutting boards and cleaning tools",
+      "Set up proper cleaning supply storage"
+      // Additional checklist items
+    ],
+    tipsForSuccess: [
+      "Start with a complete clean of your kitchen before implementing new systems",
+      "Color-coding is one of the most effective ways to prevent cross-contamination",
+      "Clean as you go is easier than cleaning everything at the end"
+    ]
+  },
+  // Additional quests would follow the same structure
 ];
