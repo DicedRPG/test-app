@@ -7,7 +7,6 @@ class UserService {
     console.log("UserService instance created");
   }
   
-  // Get attribute hours
   async getAttributeHours(attribute) {
     try {
       const data = await this.db.get(STORES.ATTRIBUTE_HOURS, attribute);
@@ -18,12 +17,10 @@ class UserService {
     }
   }
   
-  // Get all attribute hours
   async getAllAttributeHours() {
     try {
       const attributes = await this.db.getAll(STORES.ATTRIBUTE_HOURS);
       
-      // Default attributes with zero hours
       const result = {
         technique: 0,
         management: 0,
@@ -31,7 +28,6 @@ class UserService {
         ingredients: 0
       };
       
-      // Update with stored values
       attributes.forEach(item => {
         result[item.attribute] = item.hours;
       });
@@ -48,7 +44,6 @@ class UserService {
     }
   }
   
-  // Update attribute hours
   async updateAttributeHours(attribute, hours) {
     try {
       const now = new Date();
@@ -66,16 +61,10 @@ class UserService {
     }
   }
   
-  // Add attribute hours (increment)
   async addAttributeHours(attribute, additionalHours) {
     try {
-      // Get current hours
       const currentHours = await this.getAttributeHours(attribute);
-      
-      // Calculate new total
       const newTotal = currentHours + additionalHours;
-      
-      // Update storage
       return this.updateAttributeHours(attribute, newTotal);
     } catch (error) {
       console.error(`Failed to add hours to ${attribute}:`, error);
@@ -86,4 +75,4 @@ class UserService {
 
 // Create a global instance
 window.userService = new UserService(window.dicedDB);
-console.log("User service module loaded, userService object created");
+console.log("User service module loaded");
