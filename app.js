@@ -518,4 +518,22 @@ function inspectQuestUI() {
   console.log("QUEST_TYPE_COLORS:", typeof QUEST_TYPE_COLORS !== 'undefined' ? "Defined" : "Not defined");
 }
 
+// Add this function to app.js and call it during initialization
+function examinePageStructure() {
+  console.log("Examining page structure...");
+  
+  // Log all button elements on the page
+  const buttons = document.querySelectorAll('button');
+  console.log(`Found ${buttons.length} buttons:`);
+  buttons.forEach((button, i) => {
+    console.log(`Button ${i}:`, button.id || "(no id)", button.textContent.trim());
+  });
+  
+  // Log structure of quest system
+  const questSystem = document.querySelector('#quest-system');
+  if (questSystem) {
+    console.log("Quest system HTML:", questSystem.innerHTML);
+  }
+}
+
 console.log("Main application module loaded");
