@@ -151,6 +151,12 @@ async function initializeDatabaseMode() {
     initializeLocalStorageMode();
     return false;
   }
+} // Add this at the end
+  console.log("Running UI inspection...");
+  inspectQuestUI();
+  
+  console.log("Database mode initialization complete");
+  return true;
 }
 
 // Add a function to initialize quest display
@@ -487,6 +493,29 @@ function showErrorMessage(title, message) {
   } else {
     document.body.appendChild(errorElement);
   }
+}
+
+// Add near the bottom
+function inspectQuestUI() {
+  console.log("Inspecting Quest UI Elements:");
+  
+  // Check quest container
+  const questContainer = document.querySelector('#quest-system');
+  console.log("Quest system container:", questContainer ? "Found" : "Not found");
+  
+  // Check quest list
+  const questList = document.querySelector('#quest-list');
+  console.log("Quest list element:", questList ? "Found" : "Not found");
+  
+  // Check buttons
+  const viewAllButton = document.getElementById('view-all');
+  console.log("View All button:", viewAllButton ? "Found" : "Not found");
+  
+  const randomQuestButton = document.getElementById('random-quest');
+  console.log("Random Quest button:", randomQuestButton ? "Found" : "Not found");
+  
+  // Check if QUEST_TYPE_COLORS is defined
+  console.log("QUEST_TYPE_COLORS:", typeof QUEST_TYPE_COLORS !== 'undefined' ? "Defined" : "Not defined");
 }
 
 console.log("Main application module loaded");
