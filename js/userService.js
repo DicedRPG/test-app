@@ -1,19 +1,10 @@
-// userService.js - User progress operations
+// userService.js - User service for DICED app
+console.log("Loading user service module...");
 
 class UserService {
   constructor(db) {
     this.db = db;
-    this.currentUserId = 'default_user'; // For single-user mode
-  }
-  
-  // Set current user
-  setCurrentUser(userId) {
-    this.currentUserId = userId;
-  }
-  
-  // Get current user ID
-  getCurrentUserId() {
-    return this.currentUserId;
+    console.log("UserService instance created");
   }
   
   // Get attribute hours
@@ -32,8 +23,15 @@ class UserService {
     try {
       const attributes = await this.db.getAll(STORES.ATTRIBUTE_HOURS);
       
-      // Format into an object with attribute names as keys
-      const result = {};
+      // Default attributes with zero hours
+      const result = {
+        technique: 0,
+        management: 0,
+        flavor: 0,
+        ingredients: 0
+      };
+      
+      // Update with stored values
       attributes.forEach(item => {
         result[item.attribute] = item.hours;
       });
@@ -52,27 +50,16 @@ class UserService {
   
   // Update attribute hours
   async updateAttributeHours(attribute, hours) {
-    const now = new Date();
-    
     try {
-      const currentData = await this.db.get(STORES.ATTRIBUTE_HOURS, attribute);
+      const now = new Date();
+      const data = {
+        attribute,
+        hours,
+        lastUpdated: now
+      };
       
-      if (currentData) {
-        // Update existing record
-        currentData.hours = hours;
-        currentData.lastUpdated = now;
-        await this.db.update(STORES.ATTRIBUTE_HOURS, currentData);
-        return currentData;
-      } else {
-        // Create new record
-        const newData = {
-          attribute,
-          hours,
-          lastUpdated: now
-        };
-        await this.db.add(STORES.ATTRIBUTE_HOURS, newData);
-        return newData;
-      }
+      await this.db.update(STORES.ATTRIBUTE_HOURS, data);
+      return data;
     } catch (error) {
       console.error(`Failed to update hours for ${attribute}:`, error);
       throw error;
@@ -95,36 +82,8 @@ class UserService {
       throw error;
     }
   }
-  
-  // Get user's quest progress
-  async getQuestProgress(questId) {
-    try {
-      return await this.db.get(STORES.USER_PROGRESS, [questId, this.currentUserId]);
-    } catch (error) {
-      console.warn(`No progress found for quest ${questId}:`, error);
-      return null;
-    }
-  }
-  
-  // Get all completed quests for current user
-  async getCompletedQuests() {
-    try {
-      const allProgress = await this.db.getAll(
-        STORES.USER_PROGRESS,
-        'userId',
-        this.currentUserId
-      );
-      
-      // Filter to include only quests with at least one completion
-      return allProgress.filter(progress => 
-        progress.completions && progress.completions.length > 0
-      );
-    } catch (error) {
-      console.error('Failed to get completed quests:', error);
-      return [];
-    }
-  }
 }
 
-// Create and export service instance
-const userService = new UserService(dicedDB);
+// Create a global instance
+window.userService = new UserService(window.dicedDB);
+console.log("User service module loaded, userService object created");
