@@ -5,7 +5,10 @@ console.log("Loading database module...");
 const DB_NAME = "DicedRPG";
 const DB_VERSION = 1;
 const STORES = {
-  ATTRIBUTE_HOURS: "attributeHours"
+  ATTRIBUTE_HOURS: "attributeHours",
+  QUESTS: "quests",           // Basic quest information
+  QUEST_DETAILS: "questDetails", // Detailed quest content
+  USER_PROGRESS: "userProgress"  // User's quest completion status
 };
 
 // Database management class
@@ -52,13 +55,22 @@ class DicedDatabase {
         console.log("Database upgrade needed, creating stores...");
         const db = event.target.result;
         
-        if (!db.objectStoreNames.contains(STORES.ATTRIBUTE_HOURS)) {
-          db.createObjectStore(STORES.ATTRIBUTE_HOURS, { keyPath: "attribute" });
-          console.log("Created attribute hours store");
-        }
-      };
-    });
-  }
+      if (!db.objectStoreNames.contains(STORES.QUESTS)) {
+  const questStore = db.createObjectStore(STORES.QUESTS, { keyPath: "id" });
+  questStore.createIndex("type", "type", { unique: false });
+  questStore.createIndex("stageId", "stageId", { unique: false });
+}
+
+if (!db.objectStoreNames.contains(STORES.QUEST_DETAILS)) {
+  db.createObjectStore(STORES.QUEST_DETAILS, { keyPath: "questId" });
+}
+
+if (!db.objectStoreNames.contains(STORES.USER_PROGRESS)) {
+  const progressStore = db.createObjectStore(STORES.USER_PROGRESS, { 
+    keyPath: ["questId", "userId"] 
+  });
+  progressStore.createIndex("userId", "userId", { unique: false });
+}
 
   async get(storeName, key) {
     const db = await this.init();
