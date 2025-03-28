@@ -1,249 +1,162 @@
-// app.js - Main application entry point for DICED Cooking RPG App
+// app.js - Main application for DICED app
+console.log("Loading main application module...");
 
-// Constants for application settings
-const APP_VERSION = '1.0.0';
-
-// Wait for the DOM to be fully loaded before initializing
+// Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log("DOM loaded, initializing app...");
+  
   try {
-    console.log('DICED Cooking RPG App initializing...');
+    // Check if we're using the database approach
+    const usingDatabase = typeof window.dicedDB !== 'undefined' && 
+                          typeof window.userService !== 'undefined';
     
-    // Initialize the database first
-    await dicedDB.init();
-    console.log('Database initialized successfully');
+    console.log(`Using ${usingDatabase ? 'database' : 'localStorage'} mode`);
     
-    // Initialize quest system
-    await questSystem.initialize();
-    console.log('Quest system initialized');
-    
-    // Load user's attribute hours
-    const attributeHours = await userService.getAllAttributeHours();
-    console.log('User attribute hours loaded:', attributeHours);
-    
-    // Make key objects available globally for debugging (optional)
-    window.dicedDB = dicedDB;
-    window.questService = questService;
-    window.userService = userService;
-    window.questSystem = questSystem;
-    
-    // Update the attribute displays with current data
-    updateAttributeDisplays(attributeHours);
-    
-    // Set up event listeners for the attribute UI controls
-    setupAttributeEventListeners();
-    
-    // Remove loading state if present
-    const loadingElement = document.getElementById('loading-overlay');
-    if (loadingElement) {
-      loadingElement.classList.add('hidden');
+    if (usingDatabase) {
+      // Database approach
+      await initializeDatabaseMode();
+    } else {
+      // Traditional localStorage approach
+      initializeLocalStorageMode();
     }
+    
+    // Set up event listeners for either mode
+    setupEventListeners(usingDatabase);
+    
   } catch (error) {
-    // Handle initialization errors gracefully
-    console.error('Failed to initialize application:', error);
-    showErrorMessage('Application initialization failed', 
-      'Please reload the page or check your browser console for details.');
+    console.error("Application initialization failed:", error);
+    showErrorMessage("Failed to initialize application", error.message);
   }
 });
 
-/**
- * Update all attribute displays with current hours and progress
- * @param {Object} attributeHours - Object containing hours for each attribute
- */
-function updateAttributeDisplays(attributeHours) {
-  // Define attributes to update
-  const attributes = ['technique', 'management', 'flavor', 'ingredients'];
-  let totalHours = 0;
-  
-  // Update each individual attribute
-  attributes.forEach(attribute => {
-    const hours = attributeHours[attribute] || 0;
-    totalHours += hours;
+// Initialize with database approach
+async function initializeDatabaseMode() {
+  try {
+    // Initialize database
+    await window.dicedDB.init();
+    console.log("Database initialized");
     
-    // Update hours display
-    const hoursElement = document.getElementById(`${attribute}-hours`);
-    if (hoursElement) {
-      hoursElement.textContent = hours.toFixed(1);
-    }
+    // Get attribute hours
+    const attributeHours = await window.userService.getAllAttributeHours();
+    console.log("Attribute hours loaded:", attributeHours);
     
-    // Calculate level and next level target
-    // This would use your existing level calculation logic from the previous app.js
-    const levelInfo = calculateLevel(hours);
+    // Update displays with database data
+    updateAttributeDisplays(attributeHours);
     
-    // Update level display
-    const levelElement = document.getElementById(`${attribute}-level`);
-    if (levelElement) {
-      levelElement.textContent = levelInfo.level;
+    // Initialize quest system if available
+    if (typeof window.questSystem !== 'undefined') {
+      await window.questSystem.initialize();
+    } else {
+      console.log("Quest system not available in database mode");
     }
     
-    // Update next level hours
-    const nextLevelElement = document.getElementById(`${attribute}-next-level`);
-    if (nextLevelElement) {
-      nextLevelElement.textContent = levelInfo.hoursForLevel;
-    }
-    
-    // Update progress bar
-    const progressBar = document.querySelector(`.attribute-card:nth-child(${attributes.indexOf(attribute) + 1}) .progress-fill`);
-    if (progressBar) {
-      const progressPercent = (levelInfo.currentLevelHours / levelInfo.hoursForLevel * 100);
-      progressBar.style.width = `${Math.min(progressPercent, 100)}%`;
-      progressBar.style.backgroundColor = levelInfo.color;
-    }
-  });
-  
-  // Update overall rank and progress
-  updateOverallRank(totalHours);
-}
-
-/**
- * Calculate level information for a specific attribute based on hours
- * @param {number} totalHours - Total hours for the attribute
- * @return {Object} Level information
- */
-function calculateLevel(totalHours) {
-  // Find current rank
-  let currentRank = RANKS[RANKS.length - 1];
-  for (const rank of RANKS) {
-    if (totalHours < rank.hoursNeeded) {
-      currentRank = rank;
-      break;
-    }
-  }
-  
-  // Find level within rank
-  for (let i = 0; i < LEVELS.length; i++) {
-    const level = LEVELS[i];
-    const nextLevel = LEVELS[i + 1];
-    
-    if (!nextLevel || totalHours < nextLevel.startAt) {
-      const hoursIntoLevel = totalHours - level.startAt;
-      
-      return {
-        level: level.level,
-        currentLevelHours: hoursIntoLevel,
-        hoursForLevel: level.hours,
-        totalHours: totalHours,
-        rank: currentRank.name,
-        color: currentRank.color
-      };
-    }
-  }
-  
-  // Default to last level if not found
-  const lastLevel = LEVELS[LEVELS.length - 1];
-  return {
-    level: lastLevel.level,
-    currentLevelHours: totalHours - lastLevel.startAt,
-    hoursForLevel: lastLevel.hours,
-    totalHours: totalHours,
-    rank: currentRank.name,
-    color: currentRank.color
-  };
-}
-
-/**
- * Update the overall rank display
- * @param {number} totalHours - Total hours across all attributes
- */
-function updateOverallRank(totalHours) {
-  // Calculate overall rank based on total hours
-  // This uses the same logic from your previous app.js
-  let currentRank = RANKS[0];
-  let previousRankTotal = 0;
-  
-  for (const rank of RANKS) {
-    if (totalHours < rank.totalHoursNeeded) {
-      currentRank = rank;
-      break;
-    }
-    previousRankTotal = rank.totalHoursNeeded;
-  }
-  
-  // Calculate progress percentage
-  const progressPercent = Math.min(
-    ((totalHours - previousRankTotal) / (currentRank.totalHoursNeeded - previousRankTotal)) * 100,
-    100
-  );
-  
-  // Update rank display
-  document.getElementById('overall-rank').textContent = currentRank.name;
-  document.getElementById('overall-hours').textContent = totalHours.toFixed(1);
-  document.getElementById('overall-next-rank').textContent = 
-    (currentRank.totalHoursNeeded - previousRankTotal).toFixed(1);
-  
-  // Update progress bar
-  const progressBar = document.querySelector('.overall-rank-card .progress-fill');
-  if (progressBar) {
-    progressBar.style.width = `${progressPercent}%`;
-    progressBar.style.backgroundColor = currentRank.color;
+    console.log("Database mode initialization complete");
+    return true;
+  } catch (error) {
+    console.error("Database mode initialization failed:", error);
+    // Fall back to localStorage mode
+    console.log("Falling back to localStorage mode");
+    initializeLocalStorageMode();
+    return false;
   }
 }
 
-/**
- * Set up event listeners for attribute management controls
- */
-function setupAttributeEventListeners() {
+// Initialize with traditional localStorage approach
+function initializeLocalStorageMode() {
+  // Load from localStorage
+  store.loadFromStorage();
+  console.log("State loaded from localStorage");
+  
+  // Initialize quest system
+  if (typeof questSystem !== 'undefined') {
+    questSystem.initialize();
+  }
+  
+  // Update displays
+  updateDisplay();
+  
+  console.log("localStorage mode initialization complete");
+  return true;
+}
+
+// Set up event listeners for either mode
+function setupEventListeners(usingDatabase) {
+  console.log(`Setting up event listeners for ${usingDatabase ? 'database' : 'localStorage'} mode`);
+  
   // Add hours button
   const addHoursButton = document.getElementById('add-hours-button');
   if (addHoursButton) {
-    addHoursButton.addEventListener('click', handleAddHours);
+    addHoursButton.addEventListener('click', 
+      usingDatabase ? handleDatabaseAddHours : handleAddHours);
   }
 
   // Adjust hours button
   const adjustHoursButton = document.getElementById('adjust-hours-button');
   if (adjustHoursButton) {
-    adjustHoursButton.addEventListener('click', handleAdjustHours);
+    adjustHoursButton.addEventListener('click', 
+      usingDatabase ? handleDatabaseAdjustHours : handleAdjustHours);
   }
 }
 
-/**
- * Handle adding hours to an attribute
- */
-async function handleAddHours() {
-  // Get selected attribute and hours value
+// Handle adding hours with database
+async function handleDatabaseAddHours() {
   const attribute = document.getElementById('attribute-select').value;
   const hours = parseFloat(document.getElementById('hours-input').value);
   
-  // Validate input
   if (isNaN(hours) || hours <= 0) {
-    showNotification('Please enter a valid number of hours', 'error');
+    alert('Please enter a valid number of hours');
     return;
   }
   
   try {
-    // Show loading state
-    showNotification(`Adding ${hours} hours to ${attribute}...`, 'info');
+    console.log(`Adding ${hours} hours to ${attribute} via database`);
     
-    // Add hours to the attribute using userService
-    await userService.addAttributeHours(attribute, hours);
+    // Add hours using userService
+    await window.userService.addAttributeHours(attribute, hours);
     
-    // Get updated hours and refresh display
-    const attributeHours = await userService.getAllAttributeHours();
+    // Get updated attribute hours
+    const attributeHours = await window.userService.getAllAttributeHours();
+    
+    // Update displays
     updateAttributeDisplays(attributeHours);
     
     // Reset input
     document.getElementById('hours-input').value = '1';
     
-    // Show success notification
-    showNotification(`Added ${hours} hours to ${attribute}!`, 'success');
-    
   } catch (error) {
-    console.error('Failed to add hours:', error);
-    showNotification('Failed to add hours. Please try again.', 'error');
+    console.error("Failed to add hours:", error);
+    alert(`Failed to add hours: ${error.message}`);
   }
 }
 
-/**
- * Handle adjusting total hours for an attribute
- */
-async function handleAdjustHours() {
-  // Get selected attribute
+// Handle adding hours with localStorage (original function)
+function handleAddHours() {
+  const attribute = document.getElementById('attribute-select').value;
+  const hours = parseFloat(document.getElementById('hours-input').value);
+  
+  if (hours <= 0) {
+    alert('Please enter a valid number of hours');
+    return;
+  }
+  
+  const currentState = store.getState();
+  store.updateState(`attributeHours.${attribute}`, 
+    (currentState.attributeHours[attribute] || 0) + hours
+  );
+  
+  // Reset input
+  document.getElementById('hours-input').value = '1';
+}
+
+// Handle adjusting hours with database
+async function handleDatabaseAdjustHours() {
   const attribute = document.getElementById('attribute-select').value;
   
   try {
     // Get current hours
-    const currentHours = await userService.getAttributeHours(attribute);
+    const currentHours = await window.userService.getAttributeHours(attribute);
     
-    // Prompt user for new total
+    // Prompt for new hours
     const newHours = prompt(
       `Current hours for ${attribute}: ${currentHours}\nEnter new total hours:`,
       currentHours
@@ -254,126 +167,112 @@ async function handleAdjustHours() {
     // Validate input
     const newHoursNum = parseFloat(newHours);
     if (isNaN(newHoursNum) || newHoursNum < 0) {
-      showNotification('Please enter a valid number of hours', 'error');
+      alert('Please enter a valid number of hours');
       return;
     }
     
     // Confirm action
     if (confirm(`Are you sure you want to set ${attribute} to ${newHoursNum} hours?`)) {
-      // Show loading state
-      showNotification(`Updating ${attribute} to ${newHoursNum} hours...`, 'info');
+      console.log(`Setting ${attribute} to ${newHoursNum} hours via database`);
       
       // Update hours using userService
-      await userService.updateAttributeHours(attribute, newHoursNum);
+      await window.userService.updateAttributeHours(attribute, newHoursNum);
       
-      // Get updated hours and refresh display
-      const attributeHours = await userService.getAllAttributeHours();
+      // Get updated attribute hours
+      const attributeHours = await window.userService.getAllAttributeHours();
+      
+      // Update displays
       updateAttributeDisplays(attributeHours);
-      
-      // Show success notification
-      showNotification(`Updated ${attribute} to ${newHoursNum} hours!`, 'success');
     }
   } catch (error) {
-    console.error('Failed to adjust hours:', error);
-    showNotification('Failed to adjust hours. Please try again.', 'error');
+    console.error("Failed to adjust hours:", error);
+    alert(`Failed to adjust hours: ${error.message}`);
   }
 }
 
-/**
- * Display a notification to the user
- * @param {string} message - The message to display
- * @param {string} type - The type of notification (info, success, error)
- */
-function showNotification(message, type = 'info') {
-  // Create notification element if it doesn't exist
-  let notification = document.querySelector('.notification');
-  if (!notification) {
-    notification = document.createElement('div');
-    notification.className = 'notification';
-    document.body.appendChild(notification);
+// Handle adjusting hours with localStorage (original function)
+function handleAdjustHours() {
+  const attribute = document.getElementById('attribute-select').value;
+  const currentState = store.getState();
+  const currentHours = currentState.attributeHours[attribute];
+  
+  const newHours = prompt(
+    `Current hours for ${attribute}: ${currentHours}\nEnter new total hours:`,
+    currentHours
+  );
+  
+  if (newHours === null) return; // User cancelled
+  
+  const newHoursNum = parseFloat(newHours);
+  if (isNaN(newHoursNum) || newHoursNum < 0) {
+    alert('Please enter a valid number of hours');
+    return;
   }
   
-  // Set message and type
-  notification.textContent = message;
-  notification.className = `notification ${type}`;
-  
-  // Show notification
-  notification.style.display = 'block';
-  
-  // Hide after 3 seconds
-  setTimeout(() => {
-    notification.style.display = 'none';
-  }, 3000);
-}
-
-/**
- * Display an error message to the user
- * @param {string} title - The error title
- * @param {string} message - The detailed error message
- */
-function showErrorMessage(title, message) {
-  // Create error container
-  const errorContainer = document.createElement('div');
-  errorContainer.className = 'error-container';
-  errorContainer.innerHTML = `
-    <h3>${title}</h3>
-    <p>${message}</p>
-    <button onclick="location.reload()">Reload Page</button>
-  `;
-  
-  // Replace body content or append
-  const mainContent = document.querySelector('.dashboard');
-  if (mainContent) {
-    mainContent.innerHTML = '';
-    mainContent.appendChild(errorContainer);
-  } else {
-    document.body.innerHTML = '';
-    document.body.appendChild(errorContainer);
+  if (confirm(`Are you sure you want to set ${attribute} to ${newHoursNum} hours?`)) {
+    store.updateState(`attributeHours.${attribute}`, newHoursNum);
   }
 }
 
-/**
- * Register service worker for offline support
- */
-function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => {
-        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-      })
-      .catch(error => {
-        console.log('ServiceWorker registration failed: ', error);
-      });
-    });
-  }
-}
-
-// Initialize service worker if needed
-registerServiceWorker();
-
-/**
- * Check for app updates
- */
-function checkForUpdates() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistration().then(reg => {
-      if (reg) reg.update().catch(err => console.error('Error checking for updates:', err));
-    });
-  }
-}
-
-// Add update detection
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    // New service worker activated
-    window.location.reload(); // Reload the page to get new content
+// Update attribute displays with database data
+function updateAttributeDisplays(attributeHours) {
+  // Update each attribute display
+  const attributes = ['technique', 'management', 'flavor', 'ingredients'];
+  let totalHours = 0;
+  
+  attributes.forEach(attribute => {
+    const hours = attributeHours[attribute] || 0;
+    totalHours += hours;
+    
+    // Update hours display
+    const hoursElement = document.getElementById(`${attribute}-hours`);
+    if (hoursElement) {
+      hoursElement.textContent = hours.toFixed(1);
+    }
+    
+    // Update other elements as needed
+    // ...
   });
   
-  // Check for updates when the page loads and periodically
-  checkForUpdates();
-  setInterval(checkForUpdates, 60 * 60 * 1000); // Check hourly
+  // Call original updateDisplay if available, for other elements
+  if (typeof updateDisplay === 'function') {
+    try {
+      updateDisplay();
+    } catch (error) {
+      console.warn("Error in original updateDisplay function:", error);
+    }
+  }
 }
 
-// Make checkForUpdates available globally
-window.checkForUpdates = checkForUpdates;
+// Show error message
+function showErrorMessage(title, message) {
+  console.error(`${title}: ${message}`);
+  
+  // Create error element
+  const errorElement = document.createElement('div');
+  errorElement.style.backgroundColor = '#ffebee';
+  errorElement.style.color = '#b71c1c';
+  errorElement.style.padding = '20px';
+  errorElement.style.margin = '20px';
+  errorElement.style.borderRadius = '8px';
+  errorElement.style.border = '1px solid #f44336';
+  
+  errorElement.innerHTML = `
+    <h3 style="margin-top: 0">${title}</h3>
+    <p>${message}</p>
+    <div>
+      <button onclick="location.reload()">Reload App</button>
+      <button onclick="this.parentNode.parentNode.style.display='none'">Dismiss</button>
+    </div>
+  `;
+  
+  // Add to page
+  const container = document.querySelector('.dashboard');
+  if (container) {
+    container.appendChild(errorElement);
+  } else {
+    document.body.appendChild(errorElement);
+  }
+}
+
+console.log("Main application module loaded");
