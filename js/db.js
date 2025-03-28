@@ -17,11 +17,9 @@ class DicedDatabase {
     console.log("DicedDatabase instance created");
   }
 
-  // Initialize the database
   async init() {
     if (this.db) return this.db;
     if (this.isInitializing) {
-      // Return a promise that resolves when initialization completes
       return new Promise(resolve => {
         this.initCallbacks.push(resolve);
       });
@@ -31,35 +29,29 @@ class DicedDatabase {
     this.isInitializing = true;
     
     return new Promise((resolve, reject) => {
-      // Open the IndexedDB database
       const request = indexedDB.open(DB_NAME, DB_VERSION);
       
-      // Handle errors
       request.onerror = event => {
         console.error("Database error:", event.target.error);
         this.isInitializing = false;
         reject(event.target.error);
       };
       
-      // Handle successful opening
       request.onsuccess = event => {
         console.log("Database opened successfully");
         this.db = event.target.result;
         this.isInitializing = false;
         
-        // Resolve all pending callbacks
         this.initCallbacks.forEach(callback => callback(this.db));
         this.initCallbacks = [];
         
         resolve(this.db);
       };
       
-      // Handle database upgrades
       request.onupgradeneeded = event => {
         console.log("Database upgrade needed, creating stores...");
         const db = event.target.result;
         
-        // Create attribute hours store if it doesn't exist
         if (!db.objectStoreNames.contains(STORES.ATTRIBUTE_HOURS)) {
           db.createObjectStore(STORES.ATTRIBUTE_HOURS, { keyPath: "attribute" });
           console.log("Created attribute hours store");
@@ -68,7 +60,6 @@ class DicedDatabase {
     });
   }
 
-  // Basic get operation
   async get(storeName, key) {
     const db = await this.init();
     return new Promise((resolve, reject) => {
@@ -81,7 +72,6 @@ class DicedDatabase {
     });
   }
   
-  // Basic getAll operation
   async getAll(storeName) {
     const db = await this.init();
     return new Promise((resolve, reject) => {
@@ -94,7 +84,6 @@ class DicedDatabase {
     });
   }
   
-  // Basic add operation
   async add(storeName, data) {
     const db = await this.init();
     return new Promise((resolve, reject) => {
@@ -107,7 +96,6 @@ class DicedDatabase {
     });
   }
   
-  // Basic update operation
   async update(storeName, data) {
     const db = await this.init();
     return new Promise((resolve, reject) => {
