@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Initialize with database approach
+// Add to the initializeDatabaseMode function
 async function initializeDatabaseMode() {
   try {
     // Initialize database
@@ -124,17 +124,23 @@ async function initializeDatabaseMode() {
     const attributeHours = await window.userService.getAllAttributeHours();
     console.log("Attribute hours loaded:", attributeHours);
     
+    // Check if we need to initialize quest data
+    const existingQuests = await window.questService.getAllQuests();
+    if (!existingQuests || existingQuests.length === 0) {
+      // Initialize quests from the original data source
+      if (typeof QUEST_DATA !== 'undefined') {
+        console.log("Initializing quest data...");
+        await window.questService.initializeWithQuestData(QUEST_DATA);
+      } else {
+        console.warn("QUEST_DATA not available, skipping quest initialization");
+      }
+    }
+    
     // Update displays with database data
     updateAttributeDisplays(attributeHours);
     
-    // Initialize quest system if available
-    if (typeof window.questSystem !== 'undefined') {
-      await window.questSystem.initialize();
-    } else if (typeof questSystem !== 'undefined') {
-      questSystem.initialize();
-    } else {
-      console.log("Quest system not available in database mode");
-    }
+    // Initialize quest system display
+    await initializeQuestDisplay();
     
     console.log("Database mode initialization complete");
     return true;
@@ -145,6 +151,96 @@ async function initializeDatabaseMode() {
     initializeLocalStorageMode();
     return false;
   }
+}
+
+// Add a function to initialize quest display
+async function initializeQuestDisplay() {
+  try {
+    const allQuests = await window.questService.getAllQuests();
+    console.log(`Loaded ${allQuests.length} quests`);
+    
+    // Set up quest display UI
+    setupQuestUI(allQuests);
+  } catch (error) {
+    console.error("Failed to initialize quest display:", error);
+  }
+}
+
+// Function to set up quest UI
+function setupQuestUI(quests) {
+  // Find the container for quests
+  const questContainer = document.querySelector('#quest-system .content');
+  if (!questContainer) {
+    console.error("Quest container not found");
+    return;
+  }
+  
+  // Set up event listeners for quest buttons
+  const viewAllButton = document.getElementById('view-all');
+  if (viewAllButton) {
+    viewAllButton.addEventListener('click', () => showAllQuests(quests));
+  }
+  
+  const randomQuestButton = document.getElementById('random-quest');
+  if (randomQuestButton) {
+    randomQuestButton.addEventListener('click', () => showRandomQuest(quests));
+  }
+  
+  // Show available quests
+  showAllQuests(quests);
+}
+
+// Function to display all quests
+function showAllQuests(quests) {
+  const questList = document.querySelector('#quest-list');
+  if (!questList) return;
+  
+  // Clear current content
+  questList.innerHTML = '';
+  
+  if (quests.length === 0) {
+    questList.innerHTML = '<p>No quests available.</p>';
+    return;
+  }
+  
+  // Create a grid for quests
+  const questGrid = document.createElement('div');
+  questGrid.className = 'quest-grid';
+  
+  // Add each quest
+  quests.forEach(quest => {
+    const questItem = createQuestItem(quest);
+    questGrid.appendChild(questItem);
+  });
+  
+  questList.appendChild(questGrid);
+}
+
+// Function to create a quest item element
+function createQuestItem(quest) {
+  const questItem = document.createElement('div');
+  questItem.className = 'quest-item';
+  
+  // Color indicator based on quest type
+  const typeColor = QUEST_TYPE_COLORS[quest.type] || '#888888';
+  
+  questItem.innerHTML = `
+    <div class="quest-type-banner" style="background-color: ${typeColor};"></div>
+    <div class="quest-content">
+      <h4>${quest.questName}</h4>
+      <p>${quest.description}</p>
+      <div class="quest-details">
+        <span>${quest.primaryFocus}: ${quest.primaryHours}h</span>
+        <span>${quest.secondaryFocus}: ${quest.secondaryHours}h</span>
+        ${quest.diceRequired ? '<span class="dice-required">🎲</span>' : ''}
+      </div>
+    </div>
+  `;
+  
+  // Add click handler
+  questItem.addEventListener('click', () => showQuestDetails(quest));
+  
+  return questItem;
 }
 
 // Initialize with traditional localStorage approach
