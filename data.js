@@ -463,5 +463,447 @@ const QUEST_DATA = [
       "Start with basics and add specialized equipment as skills grow",
       "Always research before making significant equipment investments"
     ]
-  }
-];
+  },
+
+    // Stage 2 Data
+    {
+    id: 2,
+    questName: "Basic Knife Skills I",
+    rank: "Home Cook",
+    type: "Training",
+    primaryFocus: "Technique",
+    secondaryFocus: "Management",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Master foundational cutting techniques for basic vegetable preparation",
+    stageId: 2,
+    stageName: "Knife Skills & Heat Control",
+    learningObjectives: [
+      "Understand the anatomy of a chef's knife and proper handling",
+      "Master fundamental knife grips and safe cutting techniques",
+      "Learn essential vegetable cutting methods: rough chop, dice, and slice",
+      "Practice proper knife safety and care",
+      "Develop efficient cutting workspace organization"
+    ],
+    equipmentNeeded: [
+      "Chef's knife",
+      "Cutting board",
+      "Vegetables for practice (onions, carrots, celery)",
+      "Kitchen towel or paper towels",
+      "Container for scraps",
+      "Honing rod (optional)"
+    ],
+    contentSections: [
+      {
+        title: "Knife Fundamentals",
+        subsections: [
+          {
+            subtitle: "Knife Anatomy",
+            content: "Learn the key parts of a chef's knife: tip, edge, heel, spine, bolster, handle, and tang. Understand the differences between Western-style and Japanese-style knives and their specific purposes."
+          },
+          {
+            subtitle: "Proper Grip Techniques",
+            content: "Master two primary grips: 1) Blade grip (pinch grip): Pinch blade between thumb and forefinger at bolster, wrap remaining fingers around handle. 2) Handle grip: For more delicate tasks, traditionally grip the handle."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Cutting Technique Mastery",
+        steps: [
+          "Practice slicing vegetables with uniform thickness",
+          "Create precise dice with consistent cube sizes",
+          "Perform rough chopping for herbs and leafy vegetables",
+          "Focus on proper hand positioning and safety",
+          "Assess and improve cutting consistency"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Demonstrated safe knife handling",
+      "Created consistent vegetable slices",
+      "Produced uniform diced vegetables",
+      "Performed efficient rough chopping",
+      "Maintained a clean, organized workspace"
+    ],
+    tipsForSuccess: [
+      "Start slowly and prioritize accuracy over speed",
+      "Keep your knife extremely sharp",
+      "Let the knife's weight do most of the work",
+      "Practice regularly with different vegetables",
+      "Always maintain the 'claw' hand position for safety"
+    ]
+  },
+  {
+    id: 5,
+    questName: "Basic Knife Skills II",
+    rank: "Home Cook",
+    type: "Training",
+    primaryFocus: "Technique",
+    secondaryFocus: "Management",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Build on basic skills with more advanced cutting techniques",
+    stageId: 2,
+    stageName: "Knife Skills & Heat Control",
+    learningObjectives: [
+      "Master professional-level knife cuts: julienne, brunoise, and chiffonade",
+      "Understand culinary applications for specialized cuts",
+      "Develop greater knife control and precision",
+      "Learn to maintain consistency in cut sizes",
+      "Practice efficient cutting workflows"
+    ],
+    equipmentNeeded: [
+      "Sharp chef's knife",
+      "Cutting board",
+      "Vegetables for practice (carrots, celery, herbs)",
+      "Ruler or measuring tape (optional)",
+      "Kitchen towel",
+      "Prep bowls"
+    ],
+    contentSections: [
+      {
+        title: "Advanced Cutting Techniques",
+        subsections: [
+          {
+            subtitle: "Julienne (Matchstick Cut)",
+            content: "Create precise 1/8 inch × 1/8 inch × 2 inch strips. Practice with firm vegetables like carrots, zucchini, and bell peppers. Used in stir-fries, salads, and garnishes."
+          },
+          {
+            subtitle: "Brunoise (Fine Dice)",
+            content: "Transform julienne cuts into tiny 1/8 inch cubes. Requires extreme precision and is used for refined sauces, clear soups, and elegant presentations."
+          },
+          {
+            subtitle: "Chiffonade (Ribbon Cut)",
+            content: "Stack and roll large, flat leaves tightly, then slice thinly to create delicate herb ribbons. Perfect for garnishing and adding fresh herb flavor."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Precision Cutting Challenge",
+        steps: [
+          "Create julienne cuts of increasing precision",
+          "Transform julienne into perfect brunoise cubes",
+          "Practice chiffonade with different leaf types",
+          "Measure and verify cut dimensions",
+          "Create a dish showcasing multiple cutting techniques"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Demonstrated julienne cutting technique",
+      "Created uniform brunoise cubes",
+      "Produced delicate chiffonade ribbons",
+      "Maintained consistent cut sizes",
+      "Applied cuts in a practical cooking scenario"
+    ],
+    tipsForSuccess: [
+      "Take your time—advanced cuts require patience",
+      "Keep your knife extremely sharp",
+      "Use the tip of the knife for precise brunoise cutting",
+      "Practice these cuts regularly to build muscle memory",
+      "Focus on precision first, then gradually increase speed"
+    ]
+  },
+  {
+    id: 8,
+    questName: "Heat Control Fundamentals",
+    rank: "Home Cook",
+    type: "Training",
+    primaryFocus: "Technique",
+    secondaryFocus: "Management",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Master understanding and control of cooking temperatures",
+    stageId: 2,
+    stageName: "Knife Skills & Heat Control",
+    learningObjectives: [
+      "Understand different heat levels and their applications",
+      "Master heat adjustment techniques on various cooking appliances",
+      "Learn to recognize visual and sensory cues for proper heat",
+      "Practice precise temperature control through egg cookery",
+      "Develop troubleshooting skills for heat-related cooking problems"
+    ],
+    equipmentNeeded: [
+      "Medium pot or pan",
+      "Skillet or sauté pan",
+      "Eggs (6-12 for practice)",
+      "Butter or oil",
+      "Spatula or spoon",
+      "Instant-read thermometer (optional)",
+      "Timer"
+    ],
+    contentSections: [
+      {
+        title: "Heat Level Understanding",
+        subsections: [
+          {
+            subtitle: "Temperature Ranges",
+            content: "Learn standard heat levels: Low (180-200°F), Medium-Low (200-300°F), Medium (300-375°F), Medium-High (375-450°F), High (450-650°F). Understand appropriate uses for each heat level."
+          },
+          {
+            subtitle: "Cookware and Heat Behavior",
+            content: "Study how different materials conduct heat: Stainless Steel (uneven but heat-retentive), Cast Iron (slow but even heating), Nonstick (quick heating), Copper (extremely responsive)."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Egg Cookery Heat Control",
+        steps: [
+          "Practice cooking eggs using different techniques",
+          "Identify proper heat levels for each egg style",
+          "Recognize visual and sensory cues of correct heat",
+          "Adjust heat to maintain proper cooking conditions",
+          "Compare results of different heat management approaches"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Demonstrated understanding of heat levels",
+      "Cooked eggs with precise temperature control",
+      "Recognized proper heat indicators",
+      "Adjusted heat effectively during cooking",
+      "Produced consistent, well-cooked eggs"
+    ],
+    tipsForSuccess: [
+      "Heat control takes practice—be patient with yourself",
+      "Focus on visual and sensory cues rather than dial settings",
+      "Learn the specific behavior of your own stove",
+      "Preheating properly is critical for most cooking methods",
+      "Start with lower heat when uncertain—you can always increase"
+    ]
+  },
+  {
+    id: 10,
+    questName: "Boiling & Simmering",
+    rank: "Home Cook",
+    type: "Training",
+    primaryFocus: "Technique",
+    secondaryFocus: "Management",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Master cooking techniques for foods in liquid",
+    stageId: 2,
+    stageName: "Knife Skills & Heat Control",
+    learningObjectives: [
+      "Understand the difference between boiling and simmering temperatures",
+      "Learn proper techniques for cooking various foods in liquid",
+      "Master timing and doneness indicators for pasta, grains, and vegetables",
+      "Develop skills for managing multiple items cooking in liquid",
+      "Practice proper salting and seasoning of cooking liquid"
+    ],
+    equipmentNeeded: [
+      "Large pot for pasta/vegetables",
+      "Medium saucepan for grains",
+      "Colander or strainer",
+      "Timer",
+      "Measuring cups and spoons",
+      "Slotted spoon",
+      "Long-handled spoon for stirring",
+      "Tongs",
+      "Instant-read thermometer (optional)"
+    ],
+    contentSections: [
+      {
+        title: "Water Temperature Fundamentals",
+        subsections: [
+          {
+            subtitle: "Temperature Spectrum",
+            content: "Learn water temperature ranges: Cold (32-80°F), Warm (80-110°F), Hot (110-150°F), Poaching (160-180°F), Simmering (180-205°F), Boiling (212°F at sea level). Understand practical applications for each range."
+          },
+          {
+            subtitle: "Altitude Considerations",
+            content: "Understand how altitude affects boiling point: Sea Level (212°F), 2,000 feet (208°F), 5,000 feet (203°F). Learn to adjust cooking times and liquid quantities accordingly."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Liquid Cooking Techniques",
+        steps: [
+          "Practice boiling pasta to al dente perfection",
+          "Cook different types of grains using absorption method",
+          "Blanch various vegetables to maintain color and texture",
+          "Practice maintaining consistent liquid temperatures",
+          "Coordinate cooking of multiple ingredients in liquid"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Demonstrated proper boiling and simmering techniques",
+      "Cooked pasta to correct doneness",
+      "Prepared perfectly cooked grains",
+      "Maintained appropriate cooking liquid temperatures",
+      "Seasoned cooking liquids effectively"
+    ],
+    tipsForSuccess: [
+      "Salt pasta water generously—it should taste like sea water",
+      "Use a timer rather than guessing cooking times",
+      "Test for doneness frequently as cooking time approaches",
+      "Save pasta water for sauces—it's liquid gold",
+      "Don't crowd the pot when blanching vegetables"
+    ]
+  },
+  {
+    id: 118,
+    questName: "Knife Skills Video Study",
+    rank: "Home Cook",
+    type: "Explore",
+    primaryFocus: "Technique",
+    secondaryFocus: "Management",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Learn advanced knife skills through video instruction",
+    stageId: 2,
+    stageName: "Knife Skills & Heat Control",
+    learningObjectives: [
+      "Understand proper knife grip and cutting techniques",
+      "Learn standard cuts and their culinary applications",
+      "Develop awareness of safety practices and workflow",
+      "Create a progressive skill-building plan for knife technique"
+    ],
+    equipmentNeeded: [
+      "Device with internet access",
+      "Notebook or digital note-taking system",
+      "Knife (for reference and potential practice)",
+      "Kitchen towel"
+    ],
+    contentSections: [
+      {
+        title: "Video Research Approach",
+        subsections: [
+          {
+            subtitle: "Video Selection Criteria",
+            content: "Look for high-quality knife skills videos from culinary schools, professional chefs, and reputable cooking websites. Prioritize videos with multiple camera angles, slow-motion demonstrations, and clear explanations."
+          },
+          {
+            subtitle: "Analysis Techniques",
+            content: "Focus on hand positioning, knife handling, cutting motion, and safety practices. Take detailed notes on techniques, common mistakes, and professional tips."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Knife Technique Video Analysis",
+        steps: [
+          "Select 3-5 high-quality knife skills tutorial videos",
+          "Watch videos multiple times, taking detailed notes",
+          "Sketch or diagram proper hand and knife positioning",
+          "Identify key techniques and safety considerations",
+          "Create a personal reference guide for knife skills"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Analyzed multiple knife skills tutorial videos",
+      "Created detailed notes on cutting techniques",
+      "Documented proper hand and knife positioning",
+      "Identified key safety practices",
+      "Developed a personal knife skills reference guide"
+    ],
+    tipsForSuccess: [
+      "Focus on understanding body mechanics rather than just visual outcomes",
+      "Study variations in technique between different expert demonstrators",
+      "Pay special attention to transitions between cuts",
+      "Note workflow patterns that maximize efficiency and safety",
+      "Consider filming your own practice sessions to compare"
+    ]
+  },
+  {
+    id: 109,
+    questName: "Food Science Basics",
+    rank: "Home Cook",
+    type: "Explore",
+    primaryFocus: "Technique",
+    secondaryFocus: "Management",
+    primaryHours: 1.5,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Explore the scientific principles behind cooking techniques",
+    stageId: 2,
+    stageName: "Knife Skills & Heat Control",
+      milestone: true,
+      unlocksStage: 3,
+      unlockMessage: "Stage 3: Flavor Development is now available!",
+    learningObjectives: [
+      "Understand fundamental scientific principles in cooking",
+      "Learn how different cooking methods affect food at a molecular level",
+      "Discover the reasons behind common cooking practices",
+      "Apply scientific knowledge to improve cooking technique"
+    ],
+    equipmentNeeded: [
+      "Reference materials (books, trusted websites)",
+      "Notebook or digital note-taking system",
+      "Access to internet for research",
+      "Basic kitchen tools for optional demonstrations",
+      "Common household ingredients"
+    ],
+    contentSections: [
+      {
+        title: "Food Science Exploration",
+        subsections: [
+          {
+            subtitle: "Scientific Cooking Principles",
+            content: "Investigate key scientific concepts in cooking: protein denaturation, Maillard reaction, emulsification, fermentation, and heat transfer methods. Understand how chemical and physical changes occur during cooking."
+          },
+          {
+            subtitle: "Practical Applications",
+            content: "Explore how scientific understanding can improve cooking techniques, from choosing the right cooking method to understanding why certain ingredients interact the way they do."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+    {
+      title: "Cooking Science Research Project",
+      steps: [
+        "Select 3-4 fundamental food science principles",
+        "Research scientific explanations for each principle",
+        "Document how these principles apply to cooking techniques",
+        "Conduct a simple kitchen experiment to demonstrate a principle",
+        "Create a presentation or summary of your findings"
+      ]
+    }
+  ],
+  contentSections: [
+    {
+      title: "Food Science Exploration",
+      subsections: [
+        {
+          subtitle: "Scientific Cooking Principles",
+          content: "Investigate key scientific concepts in cooking: protein denaturation, Maillard reaction, emulsification, fermentation, and heat transfer methods. Understand how chemical and physical changes occur during cooking."
+        },
+        {
+          subtitle: "Practical Applications",
+          content: "Explore how scientific understanding can improve cooking techniques, from choosing the right cooking method to understanding why certain ingredients interact the way they do."
+        }
+      ]
+    }
+  ],
+  completionChecklist: [
+    "Researched multiple food science principles",
+    "Documented scientific explanations for cooking techniques",
+    "Conducted a practical experiment",
+    "Created a comprehensive summary of findings",
+    "Applied scientific insights to cooking methods"
+  ],
+  tipsForSuccess: [
+    "Focus on understanding rather than memorizing terminology",
+    "Look for sources that explain concepts simply",
+    "Draw connections between different scientific principles",
+    "Start with familiar cooking problems you've encountered",
+    "Create your reference guide with your future self in mind"
+  ]
+}];
