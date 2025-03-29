@@ -123,7 +123,7 @@ const questSystem = {
         this.showQuestList();
     },
     
-    // Make ALL quests visible by default
+    // Replace the existing initializeVisibleQuests function with this:
     initializeVisibleQuests() {
         // Make ALL quests visible by default
         const allQuestIds = QUEST_DATA.map(quest => quest.id);
@@ -160,18 +160,48 @@ const questSystem = {
         });
         
         // Add stage filters
-        const questStages = [...new Set(QUEST_DATA.filter(q => q.stageId).map(q => q.stageId))].sort();
-        questStages.forEach(stageId => {
-            // Find any quest with this stageId to get the stage name
-            const stageQuest = QUEST_DATA.find(q => q.stageId === stageId);
-            const stageName = stageQuest ? stageQuest.stageName : `Stage ${stageId}`;
+        this.addStageFilters(filterContainer);
+    },
+    
+    // Add new function to create stage filters with availability check
+    addStageFilters(container) {
+        // Get unique stage names
+        const stages = [...new Set(QUEST_DATA.filter(q => q.stageId && q.stageName)
+                               .map(q => ({id: q.stageId, name: q.stageName})))];
+        
+        // Sort by stage ID
+        stages.sort((a, b) => a.id - b.id);
+        
+        // Get visible quests from store
+        const state = store.getState();
+        const visibleQuestIds = state.visibleQuests || [];
+        
+        // For each stage, create a filter button
+        stages.forEach(stage => {
+            // Check if ANY quests from this stage are visible
+            const stageQuests = QUEST_DATA.filter(q => q.stageId === stage.id);
+            const anyVisible = stageQuests.some(q => visibleQuestIds.includes(q.id));
             
             const button = document.createElement('button');
-            button.className = `filter-button stage-filter ${this.currentFilter === `stage-${stageId}` ? 'active' : ''}`;
-            button.setAttribute('data-stage', stageId);
-            button.textContent = stageName;
-            button.addEventListener('click', () => this.setFilter(`stage-${stageId}`));
-            filterContainer.appendChild(button);
+            button.className = `filter-button stage-filter ${this.currentFilter === stage.name ? 'active' : ''}`;
+            button.setAttribute('data-stage', stage.id);
+            button.textContent = stage.name;
+            
+            if (!anyVisible) {
+                // If no quests from this stage are visible, disable the button
+                button.classList.add('disabled');
+                button.title = "Complete quests to unlock this stage";
+                
+                // Add a lock icon (optional)
+                const lockIcon = document.createElement('span');
+                lockIcon.innerHTML = ' 🔒';
+                button.appendChild(lockIcon);
+            } else {
+                // Add click event only if stage is available
+                button.addEventListener('click', () => this.setFilter(stage.name));
+            }
+            
+            container.appendChild(button);
         });
     },
     
@@ -180,14 +210,14 @@ const questSystem = {
         
         // Update button styles
         document.querySelectorAll('.filter-button').forEach(button => {
-            // For stage filters
-            if (filter.startsWith('stage-') && button.classList.contains('stage-filter')) {
-                const stageId = parseInt(filter.replace('stage-', ''));
-                button.classList.toggle('active', button.getAttribute('data-stage') == stageId);
-            } else if (!filter.startsWith('stage-')) {
-                // For regular type filters
-                button.classList.toggle('active', 
-                    button.textContent === (filter === 'all' ? 'All Quests' : filter));
+            if (button.textContent.includes('All Quests') && filter === 'all') {
+                button.classList.add('active');
+            } else if (button.getAttribute('data-type') === filter) {
+                button.classList.add('active');
+            } else if (button.getAttribute('data-stage') && button.textContent.includes(filter)) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
             }
         });
         
@@ -196,28 +226,22 @@ const questSystem = {
     },
     
     getFilteredQuests() {
-        // Check if filtering by stage
-        if (this.currentFilter.startsWith('stage-')) {
-            const stageId = parseInt(this.currentFilter.replace('stage-', ''));
-            const filteredByStage = QUEST_DATA.filter(q => q.stageId === stageId);
-            
-            // Filter to only show visible quests
-            const state = store.getState();
-            const visibleQuestIds = state.visibleQuests || [];
-            
-            return filteredByStage.filter(quest => visibleQuestIds.includes(quest.id));
-        }
-            
-        // Get quests matching current filter
-        const filteredByType = this.currentFilter === 'all' 
-            ? QUEST_DATA 
-            : QUEST_DATA.filter(q => q.type === this.currentFilter);
-            
-        // Filter to only show visible quests (for progression)
         const state = store.getState();
         const visibleQuestIds = state.visibleQuests || [];
         
-        return filteredByType.filter(quest => visibleQuestIds.includes(quest.id));
+        // Filter by visibility first
+        let filteredQuests = QUEST_DATA.filter(quest => visibleQuestIds.includes(quest.id));
+        
+        // Apply type filters
+        if (this.currentFilter !== 'all' && QUEST_TYPE_COLORS[this.currentFilter]) {
+            filteredQuests = filteredQuests.filter(q => q.type === this.currentFilter);
+        } 
+        // Apply stage filters
+        else if (this.currentFilter !== 'all') {
+            filteredQuests = filteredQuests.filter(q => q.stageName === this.currentFilter);
+        }
+        
+        return filteredQuests;
     },
     
     selectRandomQuest() {
@@ -277,21 +301,16 @@ const questSystem = {
         // Color indicator based on quest type
         const typeColor = QUEST_TYPE_COLORS[quest.type] || '#888888';
         
-        // Add stage indicator if available
-        const stageIndicator = quest.stageId ? 
-            `<span class="stage-badge">Stage ${quest.stageId}</span>` : '';
-        
         questItem.innerHTML = `
             <div class="quest-type-banner" style="background-color: ${typeColor};"></div>
             <div class="quest-content">
-                <h4>${quest.questName} ${stageIndicator}</h4>
+                <h4>${quest.questName}</h4>
                 <p>${quest.description}</p>
                 <div class="quest-details">
                     <span>${quest.primaryFocus}: ${quest.primaryHours}h</span>
                     <span>${quest.secondaryFocus}: ${quest.secondaryHours}h</span>
                     ${quest.diceRequired ? '<span class="dice-required">🎲</span>' : ''}
                     ${hasCompleted ? `<span class="completion-badge">✓ ${completions.length}</span>` : ''}
-                    ${quest.milestone ? '<span class="milestone-badge">🏆 Milestone</span>' : ''}
                 </div>
             </div>
         `;
@@ -302,7 +321,9 @@ const questSystem = {
         return questItem;
     },
     
-    // Enhanced quest display functions
+    // app.js - Enhanced quest display functions
+
+    // Extend the showQuestDetails function to handle detailed quest information
     showQuestDetails(quest) {
         const questList = document.getElementById('quest-list');
         const currentQuest = document.getElementById('current-quest');
@@ -404,45 +425,22 @@ const questSystem = {
             });
         });
     },
-
-    // Helper function to check if dice have been rolled
+    
     hasRolledDice(questId) {
         const state = store.getState();
         return state.questRolls && state.questRolls[questId];
     },
     
-    // Build dice roll section (add this function if not present)
     buildDiceRollSection(quest) {
-        // Return empty if dice not required
-        if (!quest.diceRequired) return '';
-        
-        const state = store.getState();
-        const rolls = state.questRolls && state.questRolls[quest.id];
-        
-        if (rolls) {
-            // Show existing roll results
-            return `
-                <div class="dice-roll-section">
-                    <h4>Your Dice Roll Results:</h4>
-                    <ul class="dice-results">
-                        ${Object.entries(rolls).map(([key, value]) => `
-                            <li><strong>${key}:</strong> ${value}</li>
-                        `).join('')}
-                    </ul>
-                </div>
-            `;
-        }
-        
-        // Placeholder for future roll
+        // Placeholder for dice roll section - will be implemented elsewhere
         return `
             <div class="dice-roll-section">
-                <h4>Dice Roll Required</h4>
-                <p>This quest uses dice mechanics to add variety to your cooking experience. 
-                Click "Roll Dice & Start Quest" to generate your unique combination.</p>
+                <h4>Dice Rolls Required</h4>
+                <p>This quest requires dice rolls to determine specific components.</p>
             </div>
         `;
     },
-
+    
     // Build the enhanced content sections
     buildDetailedQuestContent(quest) {
         if (!quest.learningObjectives && !quest.equipmentNeeded && !quest.contentSections) {
@@ -558,7 +556,7 @@ const questSystem = {
         html += '</div>';
         return html;
     },
-
+    
     // Enhanced cooking mode to include step-by-step guidance
     showCookingMode(quest) {
         const currentQuest = document.getElementById('current-quest');
@@ -814,16 +812,6 @@ const questSystem = {
         });
     },
     
-    // Roll dice for quest function (assume this is implemented elsewhere)
-    rollDiceForQuest(quest) {
-        // Implementation would go here
-        // For now, let's just simulate dice rolling
-        console.log(`Rolling dice for quest: ${quest.id}`);
-        
-        // After rolling, update state and show cooking mode
-        this.showCookingMode(quest);
-    },
-    
     completeQuest(quest, completionLevel = 'mastered', notes = '') {
         // Calculate rewards based on completion level
         let primaryMultiplier = 1.0;
@@ -867,7 +855,7 @@ const questSystem = {
             `attributeHours.${secondaryAttr}`, 
             (state.attributeHours[secondaryAttr] || 0) + secondaryHours
         );
-        
+
         // Check if this is a milestone quest
         if (quest.milestone === true && quest.unlocksStage) {
             console.log(`Milestone quest completed, unlocking Stage ${quest.unlocksStage}`);
@@ -1003,6 +991,9 @@ const questSystem = {
         // Add event listener
         document.getElementById('return-home').addEventListener('click', () => {
             this.showQuestList();
+            
+            // Refresh filter buttons to reflect newly unlocked stages
+            this.setupFilterButtons();
         });
     }
 };
