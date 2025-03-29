@@ -164,46 +164,59 @@ const questSystem = {
     },
     
     // Add new function to create stage filters with availability check
-    addStageFilters(container) {
-        // Get unique stage names
-        const stages = [...new Set(QUEST_DATA.filter(q => q.stageId && q.stageName)
-                               .map(q => ({id: q.stageId, name: q.stageName})))];
-        
-        // Sort by stage ID
-        stages.sort((a, b) => a.id - b.id);
-        
-        // Get visible quests from store
-        const state = store.getState();
-        const visibleQuestIds = state.visibleQuests || [];
-        
-        // For each stage, create a filter button
-        stages.forEach(stage => {
-            // Check if ANY quests from this stage are visible
-            const stageQuests = QUEST_DATA.filter(q => q.stageId === stage.id);
-            const anyVisible = stageQuests.some(q => visibleQuestIds.includes(q.id));
+    function addStageFilters(container) {
+            // Get all stages with their ids and names
+            const stagesWithDupes = QUEST_DATA
+                .filter(q => q.stageId && q.stageName)
+                .map(q => ({id: q.stageId, name: q.stageName}));
             
-            const button = document.createElement('button');
-            button.className = `filter-button stage-filter ${this.currentFilter === stage.name ? 'active' : ''}`;
-            button.setAttribute('data-stage', stage.id);
-            button.textContent = stage.name;
+            // Deduplicate based on stageId
+            const stageMap = new Map();
+            stagesWithDupes.forEach(stage => {
+                if (!stageMap.has(stage.id)) {
+                    stageMap.set(stage.id, stage);
+                }
+            });
             
-            if (!anyVisible) {
-                // If no quests from this stage are visible, disable the button
-                button.classList.add('disabled');
-                button.title = "Complete quests to unlock this stage";
+            // Convert map values to array
+            const stages = Array.from(stageMap.values());
+            
+            // Sort by stage ID
+            stages.sort((a, b) => a.id - b.id);
+            
+            // Rest of the function remains the same...
+            // Get visible quests from store
+            const state = store.getState();
+            const visibleQuestIds = state.visibleQuests || [];
+            
+            // For each stage, create a filter button
+            stages.forEach(stage => {
+                // Check if ANY quests from this stage are visible
+                const stageQuests = QUEST_DATA.filter(q => q.stageId === stage.id);
+                const anyVisible = stageQuests.some(q => visibleQuestIds.includes(q.id));
                 
-                // Add a lock icon (optional)
-                const lockIcon = document.createElement('span');
-                lockIcon.innerHTML = ' 🔒';
-                button.appendChild(lockIcon);
-            } else {
-                // Add click event only if stage is available
-                button.addEventListener('click', () => this.setFilter(stage.name));
-            }
-            
-            container.appendChild(button);
-        });
-    },
+                const button = document.createElement('button');
+                button.className = `filter-button stage-filter ${this.currentFilter === stage.name ? 'active' : ''}`;
+                button.setAttribute('data-stage', stage.id);
+                button.textContent = stage.name;
+                
+                if (!anyVisible) {
+                    // If no quests from this stage are visible, disable the button
+                    button.classList.add('disabled');
+                    button.title = "Complete quests to unlock this stage";
+                    
+                    // Add a lock icon (optional)
+                    const lockIcon = document.createElement('span');
+                    lockIcon.innerHTML = ' 🔒';
+                    button.appendChild(lockIcon);
+                } else {
+                    // Add click event only if stage is available
+                    button.addEventListener('click', () => this.setFilter(stage.name));
+                }
+                
+                container.appendChild(button);
+            });
+        },
     
     setFilter(filter) {
         this.currentFilter = filter;
