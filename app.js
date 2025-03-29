@@ -123,45 +123,15 @@ const questSystem = {
         this.showQuestList();
     },
     
+// Replace the existing initializeVisibleQuests function with this:
 initializeVisibleQuests() {
-    // Filter all quests from Stage 1
-    const stage1Quests = QUEST_DATA.filter(q => q.stageId === 1);
-    
-    // If no stageId property exists in quests, use these specific quest IDs
-    const stage1QuestIds = [1, 3, 4, 6, 103, 108]; // Kitchen Safety, Mise en Place, Recipe Reading, Measuring & Scaling, Cookbook Research, Equipment Research
-    
-    let initialQuests = [];
-    
-    // If we found quests with stageId, use those
-    if (stage1Quests.length > 0) {
-        initialQuests = stage1Quests;
-    } else {
-        // Otherwise use our hardcoded IDs
-        initialQuests = QUEST_DATA.filter(q => stage1QuestIds.includes(q.id));
-    }
-    
-    // Show all quests from all types to ensure we don't miss any
-    const allQuestTypes = QUEST_DATA.filter(q => q.type === 'Training' || 
-                                               q.type === 'Main' || 
-                                               q.type === 'Side' || 
-                                               q.type === 'Explore');
-    
-    // Take the first 10 of each type to ensure we have enough quests visible
-    const additionalQuests = [];
-    for (const type of ['Training', 'Main', 'Side', 'Explore']) {
-        const typeQuests = allQuestTypes.filter(q => q.type === type);
-        const sortedQuests = [...typeQuests].sort((a, b) => a.id - b.id);
-        additionalQuests.push(...sortedQuests.slice(0, 10));
-    }
-    
-    // Combine Stage 1 quests with additional quests, removing duplicates
-    const allVisibleQuests = [...initialQuests, ...additionalQuests];
-    const uniqueQuestIds = [...new Set(allVisibleQuests.map(q => q.id))];
+    // Make ALL quests visible by default
+    const allQuestIds = QUEST_DATA.map(quest => quest.id);
     
     // Save to state
-    store.updateState('visibleQuests', uniqueQuestIds);
+    store.updateState('visibleQuests', allQuestIds);
     
-    console.log(`Initialized ${uniqueQuestIds.length} visible quests`);
+    console.log(`All ${allQuestIds.length} quests are now visible`);
 },
     
     setupFilterButtons() {
