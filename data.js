@@ -906,4 +906,584 @@ const QUEST_DATA = [
     "Start with familiar cooking problems you've encountered",
     "Create your reference guide with your future self in mind"
   ]
-}];
+}
+
+    //stage 3 content
+    const STAGE_THREE_QUESTS = [
+  {
+    id: 7,
+    questName: "Pantry Organization",
+    rank: "Home Cook",
+    type: "Training",
+    primaryFocus: "Management",
+    secondaryFocus: "Ingredients",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Create a strategic and efficient kitchen pantry system",
+    stageId: 3,
+    stageName: "Flavor Development",
+    learningObjectives: [
+      "Design an organized, functional pantry system",
+      "Learn what staple ingredients to keep on hand",
+      "Understand proper food storage methods and shelf life",
+      "Create an inventory and shopping system",
+      "Maximize space and accessibility in storage areas",
+      "Develop strategies for food waste reduction"
+    ],
+    equipmentNeeded: [
+      "Storage containers (clear if possible)",
+      "Labels and marker",
+      "Shelf liner (optional)",
+      "Measuring tape",
+      "Notebook or digital inventory system",
+      "Cleaning supplies",
+      "Step stool (if needed for high shelves)"
+    ],
+    contentSections: [
+      {
+        title: "Pantry Organization Fundamentals",
+        subsections: [
+          {
+            subtitle: "Storage Zone Assessment",
+            content: "Identify and evaluate storage areas including dry pantry shelves, refrigerator zones, freezer space, counter storage, and deep storage for bulk items. Consider temperature, light, and humidity factors."
+          },
+          {
+            subtitle: "Essential Pantry Categories",
+            content: "Develop a comprehensive approach to organizing dry goods, canned items, oils, vinegars, herbs, spices, and refrigerated staples. Create a systematic method for tracking and maintaining your pantry."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Pantry Transformation Challenge",
+        steps: [
+          "Completely empty and clean all storage areas",
+          "Discard expired or questionable items",
+          "Group similar items together",
+          "Create an inventory of current pantry contents",
+          "Develop a storage organization system",
+          "Implement a labeling and tracking method"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Completed full pantry audit and clean-out",
+      "Created organized storage system",
+      "Developed inventory tracking method",
+      "Implemented proper food storage practices",
+      "Reduced potential food waste"
+    ],
+    tipsForSuccess: [
+      "Start small with one area before tackling the entire kitchen",
+      "Consistency in your system matters more than perfection",
+      "Clear containers save time by making contents visible",
+      "Label everything, even if it seems obvious",
+      "Do regular mini-cleanouts rather than waiting for major overhauls"
+    ]
+  },
+  {
+    id: 9,
+    questName: "Salt, Pepper & Acid",
+    rank: "Home Cook",
+    type: "Training",
+    primaryFocus: "Flavor",
+    secondaryFocus: "Technique",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Master the fundamental flavor elements of salt, pepper, and acid",
+    stageId: 3,
+    stageName: "Flavor Development",
+    learningObjectives: [
+      "Understand how salt, pepper, and acid affect food on a technical level",
+      "Learn proper seasoning techniques and timing",
+      "Develop skills for tasting and adjusting flavors",
+      "Master the use of different salt types and applications",
+      "Explore various pepper varieties and their flavor profiles",
+      "Understand how different acids can transform and balance dishes"
+    ],
+    equipmentNeeded: [
+      "Various salt types (kosher, sea salt, table salt)",
+      "Black peppercorns and grinder",
+      "Various acids (lemon, lime, vinegars)",
+      "Small bowls for tasting",
+      "Spoons for tasting",
+      "Neutral foods for seasoning practice (rice, potato, vegetables)",
+      "Small saucepan",
+      "Cutting board and knife"
+    ],
+    contentSections: [
+      {
+        title: "Seasoning Science",
+        subsections: [
+          {
+            subtitle: "Salt's Culinary Magic",
+            content: "Explore how salt enhances flavor perception, suppresses bitterness, dissolves and spreads flavor, draws moisture through osmosis, and tenderizes proteins. Learn the art of strategic salting."
+          },
+          {
+            subtitle: "Pepper and Acid Principles",
+            content: "Understand the complex flavor profiles of different pepper varieties and how acids brighten, balance, and transform dishes. Learn to use these elements to create depth and contrast in cooking."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Flavor Balance Laboratory",
+        steps: [
+          "Prepare neutral base foods for seasoning experiments",
+          "Systematically add salt, pepper, and acids",
+          "Taste and document flavor transformations",
+          "Practice adjusting seasoning in stages",
+          "Create a dish that demonstrates perfect flavor balance"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Demonstrated understanding of salt's flavor-enhancing properties",
+      "Explored multiple salt and pepper varieties",
+      "Created dishes with balanced seasoning",
+      "Developed ability to adjust flavors systematically",
+      "Understood the role of acid in cooking"
+    ],
+    tipsForSuccess: [
+      "Always start with less seasoning than you think you need",
+      "Taste frequently throughout the cooking process",
+      "Keep salt within reach while cooking",
+      "Invest in a quality pepper grinder",
+      "Remember that salt and acid can enhance sweetness too"
+    ]
+  },
+  {
+    id: 11,
+    questName: "Herbs & Spices Intro",
+    rank: "Home Cook",
+    type: "Training",
+    primaryFocus: "Flavor",
+    secondaryFocus: "Ingredients",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Discover and understand the world of culinary herbs and spices",
+    stageId: 3,
+    stageName: "Flavor Development",
+    learningObjectives: [
+      "Identify and understand common culinary herbs and spices",
+      "Learn appropriate uses and combinations for different seasonings",
+      "Develop knowledge about when to add herbs and spices during cooking",
+      "Master basic techniques for storing and preparing herbs and spices",
+      "Begin building a well-rounded spice collection",
+      "Understand cultural spice traditions and signature combinations"
+    ],
+    equipmentNeeded: [
+      "Selection of dried herbs and spices",
+      "Fresh herbs (if available)",
+      "Small bowls for tasting",
+      "Mortar and pestle (optional)",
+      "Spice grinder or coffee grinder (optional)",
+      "Small skillet for toasting spices",
+      "Cutting board and knife",
+      "Storage containers for spices"
+    ],
+    contentSections: [
+      {
+        title: "Herb and Spice Fundamentals",
+        subsections: [
+          {
+            subtitle: "Fresh Herb Identification",
+            content: "Study common fresh and dried herbs, understanding their flavor profiles, intensity, and appropriate uses. Learn techniques for handling, storing, and preparing different herb varieties."
+          },
+          {
+            subtitle: "Spice Exploration",
+            content: "Investigate various spice categories including seed, berry, bark, root, and chili spices. Learn about their origins, flavor characteristics, and culinary applications across different cuisines."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Herb and Spice Mastery Challenge",
+        steps: [
+          "Create a personal herb and spice inventory",
+          "Practice identifying herbs and spices by sight, smell, and taste",
+          "Experiment with different preparation methods",
+          "Create a flavor notes journal",
+          "Develop a storage and organization system for herbs and spices"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Identified and learned about multiple herbs and spices",
+      "Created a personal herb and spice collection",
+      "Developed proper storage techniques",
+      "Practiced various herb and spice preparation methods",
+      "Understood culinary applications of different seasonings"
+    ],
+    tipsForSuccess: [
+      "Start with small quantities of new spices",
+      "Date your spices when purchased to track freshness",
+      "Buy whole spices when possible for longer shelf life",
+      "Smell herbs and spices frequently to train your nose",
+      "Experiment with one new herb or spice at a time",
+      "Toast spices right before using for maximum flavor"
+    ]
+  },
+  {
+    id: 12,
+    questName: "Taste Development",
+    rank: "Home Cook",
+    type: "Training",
+    primaryFocus: "Flavor",
+    secondaryFocus: "Technique",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Train your palate to recognize, analyze, and balance flavors",
+    stageId: 3,
+    stageName: "Flavor Development",
+    learningObjectives: [
+      "Understand the five basic tastes and how to recognize them",
+      "Learn how to analyze flavor components in food",
+      "Develop systematic tasting methodology",
+      "Practice adjusting and balancing flavors",
+      "Train your palate to detect subtle differences",
+      "Build confidence in seasoning by taste"
+    ],
+    equipmentNeeded: [
+      "Small tasting bowls",
+      "Tasting spoons",
+      "Palette cleansers (water, plain crackers)",
+      "Notebook for tasting notes",
+      "Basic ingredients representing taste categories",
+      "Various seasonings for adjustment practice",
+      "Small saucepan or skillet for testing"
+    ],
+    contentSections: [
+      {
+        title: "Taste Perception Fundamentals",
+        subsections: [
+          {
+            subtitle: "The Five Basic Tastes",
+            content: "Deep dive into sweet, salty, sour, bitter, and umami taste sensations. Learn how each taste is perceived, its biological purpose, and its role in culinary experiences."
+          },
+          {
+            subtitle: "Sensory Exploration",
+            content: "Investigate additional sensory elements including aromatics, texture, temperature, and how these interact with basic tastes to create complex flavor experiences."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Palate Training Laboratory",
+        steps: [
+          "Create solutions representing each basic taste",
+          "Practice systematic tasting techniques",
+          "Develop a flavor recognition and description system",
+          "Experiment with flavor balancing and adjustment",
+          "Create a personal flavor memory catalog"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Demonstrated understanding of basic taste sensations",
+      "Developed systematic tasting methodology",
+      "Created flavor description vocabulary",
+      "Practiced flavor balancing techniques",
+      "Built personal flavor recognition skills"
+    ],
+    tipsForSuccess: [
+      "Taste mindfully during everyday eating",
+      "Develop a personal vocabulary that's meaningful to you",
+      "Practice describing flavors out loud or in writing",
+      "Taste ingredients in both raw and cooked states",
+      "Compare similar items from different sources",
+      "Stay curious about unfamiliar flavors"
+    ]
+  },
+  {
+    id: 80,
+    questName: "Basic Vinaigrette",
+    rank: "Home Cook",
+    type: "Side",
+    primaryFocus: "Flavor",
+    secondaryFocus: "Technique",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: true,
+    description: "Master the art of creating balanced vinaigrettes",
+    stageId: 3,
+    stageName: "Flavor Development",
+    milestone: true,
+      unlocksStage: 4,
+      unlockMessage: "Stage 4: Basic Sides & Components is now available!",
+    learningObjectives: [
+      "Master basic emulsion principles",
+      "Understand oil and acid balancing",
+      "Learn flavor building and seasoning techniques",
+      "Develop vinaigrette variations and adaptations",
+      "Create stable, well-balanced dressings"
+    ],
+    equipmentNeeded: [
+      "Small bowl or jar with tight-fitting lid",
+      "Whisk",
+      "Measuring spoons",
+      "Fine grater or microplane",
+      "Small knife and cutting board",
+      "Tasting spoons"
+    ],
+    contentSections: [
+      {
+        title: "Vinaigrette Fundamentals",
+        subsections: [
+          {
+            subtitle: "Emulsion Science",
+            content: "Learn the principles of creating and maintaining an emulsion: suspending oil droplets in water-based liquid, understanding the role of emulsifiers, and techniques for stable mixture creation."
+          },
+          {
+            subtitle: "Ingredient Balance",
+            content: "Master the art of balancing oils, acids, emulsifiers, and seasonings to create a perfectly harmonious vinaigrette. Understand the classic 3:1 oil to acid ratio and variations."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Vinaigrette Mastery Challenge",
+        steps: [
+          "Create classic vinaigrette using different mixing methods",
+          "Experiment with various oil and acid combinations",
+          "Practice emulsification techniques",
+          "Develop flavor variations",
+          "Test vinaigrettes with different salad bases"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Created stable vinaigrette emulsion",
+      "Demonstrated understanding of oil-acid balance",
+      "Developed multiple vinaigrette variations",
+      "Practiced different emulsification techniques",
+      "Matched vinaigrettes to appropriate salad ingredients"
+    ],
+    tipsForSuccess: [
+      "Always taste before serving and adjust as needed",
+      "Room temperature ingredients emulsify better",
+      "Add salt to the acid, not the oil, for better distribution",
+      "A touch of honey helps balance acidity and stabilize emulsion",
+      "Don't be afraid to experiment with different ratios"
+    ]
+  },
+     {
+    id: 104,
+    questName: "Cooking YouTube Research",
+    rank: "Home Cook",
+    type: "Explore",
+    primaryFocus: "Technique",
+    secondaryFocus: "Management",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Learn cooking techniques through visual online tutorials",
+    stageId: 3,
+    stageName: "Flavor Development",
+    learningObjectives: [
+      "Learn to identify reliable, instructional cooking content online",
+      "Develop skills in analyzing visual cooking demonstrations",
+      "Practice taking useful notes from video instruction",
+      "Build a collection of technique references for future use",
+      "Enhance understanding of cooking methods through visual learning"
+    ],
+    equipmentNeeded: [
+      "Device with internet access and video playback",
+      "Notebook or digital note-taking system",
+      "Bookmarking or playlist creation system",
+      "Basic knowledge of YouTube or other video platforms",
+      "Optional: printer for screenshots of key techniques"
+    ],
+    contentSections: [
+      {
+        title: "Video Learning Strategies",
+        subsections: [
+          {
+            subtitle: "Channel Discovery",
+            content: "Learn to search for and evaluate high-quality cooking content. Identify creators with credentials, clear explanations, and comprehensive technique demonstrations."
+          },
+          {
+            subtitle: "Analytical Viewing",
+            content: "Develop a systematic approach to watching cooking videos, focusing on technique details, instructor explanations, and practical applications of cooking methods."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Cooking Tutorial Analysis",
+        steps: [
+          "Select 3-5 cooking technique tutorial videos",
+          "Watch videos multiple times, taking detailed notes",
+          "Identify key techniques and safety considerations",
+          "Create a personal reference guide for learned techniques",
+          "Plan how to apply learned techniques in your cooking"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Analyzed multiple cooking tutorial videos",
+      "Created detailed notes on cooking techniques",
+      "Documented key learning points from videos",
+      "Developed a personal cooking technique reference",
+      "Identified potential techniques to practice"
+    ],
+    tipsForSuccess: [
+      "Quality over quantity—focus on reliable, detailed content",
+      "Create playlists organized by technique",
+      "Watch videos shortly before attempting techniques",
+      "Pay attention to troubleshooting advice in videos",
+      "Look for instructors who show mistakes as well as successes"
+    ]
+  },
+  {
+    id: 105,
+    questName: "Grocery Store Exploration",
+    rank: "Home Cook",
+    type: "Explore",
+    primaryFocus: "Ingredients",
+    secondaryFocus: "Management",
+    primaryHours: 1.5,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Discover new ingredients and expand culinary knowledge through grocery store exploration",
+    stageId: 3,
+    stageName: "Flavor Development",
+    learningObjectives: [
+      "Discover unfamiliar ingredients and their culinary applications",
+      "Learn to compare products for quality, value, and cooking purposes",
+      "Develop skills in selecting fresh produce and specialty items",
+      "Expand your ingredient vocabulary and cooking repertoire",
+      "Build knowledge of product availability and sourcing"
+    ],
+    equipmentNeeded: [
+      "Notebook or digital note-taking device",
+      "Shopping list with basic needed items (as cover for exploration)",
+      "Camera or smartphone for taking photos",
+      "Small budget for 1-3 new ingredient purchases (optional)",
+      "Grocery store map or layout (if available)",
+      "Reusable shopping bag"
+    ],
+    contentSections: [
+      {
+        title: "Strategic Store Exploration",
+        subsections: [
+          {
+            subtitle: "Section Investigation",
+            content: "Systematically explore different grocery store sections, examining product packaging, origin details, nutritional content, and potential culinary uses. Focus on understanding ingredient varieties and potential applications."
+          },
+          {
+            subtitle: "Product Comparison",
+            content: "Develop skills in evaluating different products, comparing brands, understanding quality indicators, and identifying unique or specialty ingredients."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Ingredient Discovery Challenge",
+        steps: [
+          "Create a plan to explore unfamiliar store sections",
+          "Document interesting ingredients and their potential uses",
+          "Compare similar products across different brands",
+          "Select 1-3 new ingredients to purchase and experiment with",
+          "Research cooking methods for discovered ingredients"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Explored multiple grocery store sections",
+      "Documented new and interesting ingredients",
+      "Compared product varieties and qualities",
+      "Purchased and planned to use new ingredients",
+      "Created a personal ingredient discovery reference"
+    ],
+    tipsForSuccess: [
+      "Take your time—this is about discovery, not efficiency",
+      "Read origin stories and company backgrounds on packaging",
+      "Take photos of interesting ingredients or preparation instructions",
+      "Compare prices by unit for true value",
+      "Ask for samples at service counters when available"
+    ]
+  },
+  {
+    id: 107,
+    questName: "Meal Planning Study",
+    rank: "Home Cook",
+    type: "Explore",
+    primaryFocus: "Management",
+    secondaryFocus: "Ingredients",
+    primaryHours: 1.5,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Learn effective strategies for systematic meal planning and preparation",
+    stageId: 3,
+    stageName: "Flavor Development",
+    learningObjectives: [
+      "Understand the principles of effective meal planning",
+      "Learn different approaches to weekly and monthly food preparation",
+      "Develop skills in creating balanced, practical meal plans",
+      "Practice budget-conscious food planning techniques",
+      "Create personalized planning systems and tools"
+    ],
+    equipmentNeeded: [
+      "Notebook or digital planning tool",
+      "Calendar or weekly planner",
+      "Recipe resources (cookbooks, websites, saved recipes)",
+      "Information about your typical schedule",
+      "Basic understanding of food budget",
+      "Knowledge of dietary preferences/restrictions",
+      "Access to internet for research"
+    ],
+    contentSections: [
+      {
+        title: "Meal Planning Strategies",
+        subsections: [
+          {
+            subtitle: "Personal Habit Analysis",
+            content: "Conduct a comprehensive assessment of current cooking habits, time availability, energy levels, and typical meal patterns. Develop a personalized approach to meal planning that fits your lifestyle."
+          },
+          {
+            subtitle: "Planning Methodology",
+            content: "Explore various meal planning approaches including theme-based planning, batch cooking, component preparation, and budget-focused strategies. Learn to create flexible, adaptable meal plans."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Comprehensive Meal Planning Challenge",
+        steps: [
+          "Analyze current cooking and eating habits",
+          "Develop a detailed meal plan for 5-7 days",
+          "Create a corresponding shopping list",
+          "Implement the plan and track results",
+          "Reflect on challenges and successes"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Completed comprehensive personal cooking habit assessment",
+      "Developed a detailed 5-7 day meal plan",
+      "Created an efficient shopping list",
+      "Implemented meal plan successfully",
+      "Reflected on meal planning process and potential improvements"
+    ],
+    tipsForSuccess: [
+      "Start with a shorter timeframe (3-4 days) before attempting full weeks",
+      "Be realistic about your time and energy levels",
+      "Plan for 'low effort' meals after busy days",
+      "Remember that meal planning is iterative",
+      "Create a 'meal idea bank' for inspiration"
+    ]
+  }
+];
