@@ -177,4 +177,76 @@ const QUEST_DATA = [
     ]
   },
   // Additional quests would follow the same structure
+     {
+    id: 3,  // Make sure this is unique and sequential
+    questName: "Mise en Place",
+    rank: "Home Cook",
+    type: "Training",
+    primaryFocus: "Management",
+    secondaryFocus: "Technique",
+    primaryHours: 1,
+    secondaryHours: 0.5,
+    diceRequired: false,
+    description: "Practice proper preparation and organization of ingredients",
+    
+    // Enhanced content (optional but recommended)
+    stageId: 1,
+    stageName: "Kitchen Fundamentals",
+    learningObjectives: [
+      "Understand the concept and importance of mise en place",
+      "Learn efficient ingredient preparation techniques",
+      "Practice workflow organization in the kitchen",
+      "Develop time management skills through preparation"
+    ],
+    equipmentNeeded: [
+      "Cutting board",
+      "Chef's knife",
+      "Small prep bowls or containers",
+      "Measuring tools",
+      "Kitchen towels"
+    ],
+    contentSections: [
+      {
+        title: "Mise en Place Fundamentals",
+        subsections: [
+          {
+            subtitle: "Understanding Mise en Place",
+            content: "Mise en place is a French culinary phrase meaning 'everything in its place.' It refers to organizing and arranging ingredients that will be used in cooking. This preparation method ensures efficiency, prevents mistakes, and reduces stress during the cooking process."
+          },
+          {
+            subtitle: "Setting Up Your Station",
+            content: "Create an organized workspace with all tools and ingredients within reach. Position your cutting board in the center, with ingredients on one side and preparation containers on the other."
+          }
+        ]
+      }
+    ],
+    practicalExercises: [
+      {
+        title: "Recipe Preparation Practice",
+        steps: [
+          "Select a multi-component recipe",
+          "Read through the entire recipe",
+          "List all required ingredients and tools",
+          "Prepare and organize all components before cooking",
+          "Track efficiency improvements"
+        ]
+      }
+    ],
+    completionChecklist: [
+      "Organized workspace before beginning",
+      "Prepared all ingredients before cooking",
+      "Used appropriate containers for ingredients",
+      "Maintained cleanliness throughout process",
+      "Executed recipe with minimal backtracking"
+    ],
+    tipsForSuccess: [
+      "Always read recipes completely before starting",
+      "Consider ingredient grouping by cooking stage",
+      "Clear counter space before beginning prep",
+      "Small prep bowls are invaluable investments",
+      "Practice clean-as-you-go to maintain organization"
+    ]
+  },
+  
+  // Additional new quests...
 ];
