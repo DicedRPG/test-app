@@ -117,7 +117,7 @@ const QUEST_DATA = [
     secondaryHours: 0.5,
     diceRequired: false,
     description: "Master basic vegetable cuts: rough chop, dice, and slice",
-    stageId: 2,
+    stageId: 1,
     stageName: "Knife Skills & Heat Control",
     learningObjectives: [
       "Understand the anatomy of a chef's knife and proper handling",
