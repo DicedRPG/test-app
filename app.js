@@ -123,27 +123,46 @@ const questSystem = {
         this.showQuestList();
     },
     
-    initializeVisibleQuests() {
-        // Group quests by type
-        const questsByType = {
-            'Training': QUEST_DATA.filter(q => q.type === 'Training'),
-            'Main': QUEST_DATA.filter(q => q.type === 'Main'),
-            'Side': QUEST_DATA.filter(q => q.type === 'Side'),
-            'Explore': QUEST_DATA.filter(q => q.type === 'Explore')
-        };
-        
-        // Show 3 of each type initially
-        let initialQuests = [];
-        for (const [type, quests] of Object.entries(questsByType)) {
-            // Sort by ID (lower ID = easier)
-            const sortedQuests = [...quests].sort((a, b) => a.id - b.id);
-            // Take first 3
-            initialQuests = initialQuests.concat(sortedQuests.slice(0, 3));
-        }
-        
-        // Save to state
-        store.updateState('visibleQuests', initialQuests.map(q => q.id));
-    },
+initializeVisibleQuests() {
+    // Filter all quests from Stage 1
+    const stage1Quests = QUEST_DATA.filter(q => q.stageId === 1);
+    
+    // If no stageId property exists in quests, use these specific quest IDs
+    const stage1QuestIds = [1, 3, 4, 6, 103, 108]; // Kitchen Safety, Mise en Place, Recipe Reading, Measuring & Scaling, Cookbook Research, Equipment Research
+    
+    let initialQuests = [];
+    
+    // If we found quests with stageId, use those
+    if (stage1Quests.length > 0) {
+        initialQuests = stage1Quests;
+    } else {
+        // Otherwise use our hardcoded IDs
+        initialQuests = QUEST_DATA.filter(q => stage1QuestIds.includes(q.id));
+    }
+    
+    // Show all quests from all types to ensure we don't miss any
+    const allQuestTypes = QUEST_DATA.filter(q => q.type === 'Training' || 
+                                               q.type === 'Main' || 
+                                               q.type === 'Side' || 
+                                               q.type === 'Explore');
+    
+    // Take the first 10 of each type to ensure we have enough quests visible
+    const additionalQuests = [];
+    for (const type of ['Training', 'Main', 'Side', 'Explore']) {
+        const typeQuests = allQuestTypes.filter(q => q.type === type);
+        const sortedQuests = [...typeQuests].sort((a, b) => a.id - b.id);
+        additionalQuests.push(...sortedQuests.slice(0, 10));
+    }
+    
+    // Combine Stage 1 quests with additional quests, removing duplicates
+    const allVisibleQuests = [...initialQuests, ...additionalQuests];
+    const uniqueQuestIds = [...new Set(allVisibleQuests.map(q => q.id))];
+    
+    // Save to state
+    store.updateState('visibleQuests', uniqueQuestIds);
+    
+    console.log(`Initialized ${uniqueQuestIds.length} visible quests`);
+},
     
     setupFilterButtons() {
         const filterContainer = document.getElementById('quest-filters');
