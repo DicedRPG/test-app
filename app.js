@@ -782,6 +782,45 @@ showCompletionScreen(quest) {
             `attributeHours.${secondaryAttr}`, 
             (state.attributeHours[secondaryAttr] || 0) + secondaryHours
         );
+
+        // Check if this is a milestone quest
+    if (quest.milestone === true && quest.unlocksStage) {
+        console.log(`Milestone quest completed, unlocking Stage ${quest.unlocksStage}`);
+        
+        // Find all quests from the next stage
+        const nextStageQuests = QUEST_DATA.filter(q => q.stageId === quest.unlocksStage);
+        
+        // Make sure we have quests for the next stage
+        if (nextStageQuests.length > 0) {
+            // Get current visible quests
+            const state = store.getState();
+            const visibleQuestIds = new Set(state.visibleQuests || []);
+            
+            // Add next stage quests to visible quests
+            let newlyUnlockedCount = 0;
+            nextStageQuests.forEach(q => {
+                if (!visibleQuestIds.has(q.id)) {
+                    visibleQuestIds.add(q.id);
+                    newlyUnlockedCount++;
+                }
+            });
+            
+            // Update state only if we added new quests
+            if (newlyUnlockedCount > 0) {
+                store.updateState('visibleQuests', Array.from(visibleQuestIds));
+                
+                // Show notification to user (if you have a notification system)
+                if (quest.unlockMessage) {
+                    console.log(quest.unlockMessage);
+                    // If you have a notification system:
+                    // notificationSystem.show(quest.unlockMessage);
+                }
+            }
+        } else {
+            console.log(`No quests found for Stage ${quest.unlocksStage}`);
+        }
+    }
+}
         
         // Unlock new quests
         this.unlockNewQuests(quest);
