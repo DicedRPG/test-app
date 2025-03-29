@@ -906,10 +906,9 @@ const QUEST_DATA = [
     "Start with familiar cooking problems you've encountered",
     "Create your reference guide with your future self in mind"
   ]
-}
+},
 
     //stage 3 content
-    const STAGE_THREE_QUESTS = [
   {
     id: 7,
     questName: "Pantry Organization",
