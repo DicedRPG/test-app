@@ -1212,3 +1212,11 @@ flex-direction: column; / Stack steps vertically */
 .cooking-step {
     padding: 10px; /* Slightly less padding on mobile */
 }
+
+.stage-filter.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f0f0f0;
+            color: #888;
+            border-color: #ccc;
+}
