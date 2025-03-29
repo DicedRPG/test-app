@@ -123,16 +123,16 @@ const questSystem = {
         this.showQuestList();
     },
     
-// Replace the existing initializeVisibleQuests function with this:
-initializeVisibleQuests() {
     // Make ALL quests visible by default
-    const allQuestIds = QUEST_DATA.map(quest => quest.id);
-    
-    // Save to state
-    store.updateState('visibleQuests', allQuestIds);
-    
-    console.log(`All ${allQuestIds.length} quests are now visible`);
-},
+    initializeVisibleQuests() {
+        // Make ALL quests visible by default
+        const allQuestIds = QUEST_DATA.map(quest => quest.id);
+        
+        // Save to state
+        store.updateState('visibleQuests', allQuestIds);
+        
+        console.log(`All ${allQuestIds.length} quests are now visible`);
+    },
     
     setupFilterButtons() {
         const filterContainer = document.getElementById('quest-filters');
@@ -158,6 +158,21 @@ initializeVisibleQuests() {
             button.addEventListener('click', () => this.setFilter(type));
             filterContainer.appendChild(button);
         });
+        
+        // Add stage filters
+        const questStages = [...new Set(QUEST_DATA.filter(q => q.stageId).map(q => q.stageId))].sort();
+        questStages.forEach(stageId => {
+            // Find any quest with this stageId to get the stage name
+            const stageQuest = QUEST_DATA.find(q => q.stageId === stageId);
+            const stageName = stageQuest ? stageQuest.stageName : `Stage ${stageId}`;
+            
+            const button = document.createElement('button');
+            button.className = `filter-button stage-filter ${this.currentFilter === `stage-${stageId}` ? 'active' : ''}`;
+            button.setAttribute('data-stage', stageId);
+            button.textContent = stageName;
+            button.addEventListener('click', () => this.setFilter(`stage-${stageId}`));
+            filterContainer.appendChild(button);
+        });
     },
     
     setFilter(filter) {
@@ -165,8 +180,15 @@ initializeVisibleQuests() {
         
         // Update button styles
         document.querySelectorAll('.filter-button').forEach(button => {
-            button.classList.toggle('active', 
-                button.textContent === (filter === 'all' ? 'All Quests' : filter));
+            // For stage filters
+            if (filter.startsWith('stage-') && button.classList.contains('stage-filter')) {
+                const stageId = parseInt(filter.replace('stage-', ''));
+                button.classList.toggle('active', button.getAttribute('data-stage') == stageId);
+            } else if (!filter.startsWith('stage-')) {
+                // For regular type filters
+                button.classList.toggle('active', 
+                    button.textContent === (filter === 'all' ? 'All Quests' : filter));
+            }
         });
         
         // Refresh quest list
@@ -174,6 +196,18 @@ initializeVisibleQuests() {
     },
     
     getFilteredQuests() {
+        // Check if filtering by stage
+        if (this.currentFilter.startsWith('stage-')) {
+            const stageId = parseInt(this.currentFilter.replace('stage-', ''));
+            const filteredByStage = QUEST_DATA.filter(q => q.stageId === stageId);
+            
+            // Filter to only show visible quests
+            const state = store.getState();
+            const visibleQuestIds = state.visibleQuests || [];
+            
+            return filteredByStage.filter(quest => visibleQuestIds.includes(quest.id));
+        }
+            
         // Get quests matching current filter
         const filteredByType = this.currentFilter === 'all' 
             ? QUEST_DATA 
@@ -243,16 +277,21 @@ initializeVisibleQuests() {
         // Color indicator based on quest type
         const typeColor = QUEST_TYPE_COLORS[quest.type] || '#888888';
         
+        // Add stage indicator if available
+        const stageIndicator = quest.stageId ? 
+            `<span class="stage-badge">Stage ${quest.stageId}</span>` : '';
+        
         questItem.innerHTML = `
             <div class="quest-type-banner" style="background-color: ${typeColor};"></div>
             <div class="quest-content">
-                <h4>${quest.questName}</h4>
+                <h4>${quest.questName} ${stageIndicator}</h4>
                 <p>${quest.description}</p>
                 <div class="quest-details">
                     <span>${quest.primaryFocus}: ${quest.primaryHours}h</span>
                     <span>${quest.secondaryFocus}: ${quest.secondaryHours}h</span>
                     ${quest.diceRequired ? '<span class="dice-required">🎲</span>' : ''}
                     ${hasCompleted ? `<span class="completion-badge">✓ ${completions.length}</span>` : ''}
+                    ${quest.milestone ? '<span class="milestone-badge">🏆 Milestone</span>' : ''}
                 </div>
             </div>
         `;
@@ -263,481 +302,527 @@ initializeVisibleQuests() {
         return questItem;
     },
     
-    // app.js - Enhanced quest display functions
-
-// Extend the showQuestDetails function to handle detailed quest information
-showQuestDetails(quest) {
-    const questList = document.getElementById('quest-list');
-    const currentQuest = document.getElementById('current-quest');
-    
-    if (!questList || !currentQuest) return;
-    
-    // Get completion info
-    const state = store.getState();
-    const completions = state.completedQuests.filter(c => c.questId === quest.id);
-    const completionCount = completions.length;
-    
-    // Show quest details, hide list
-    questList.classList.add('hidden');
-    currentQuest.classList.remove('hidden');
-    
-    // Update current quest in state
-    store.updateState('currentQuest', quest.id);
-    
-    // Quest type color
-    const questColor = QUEST_TYPE_COLORS[quest.type] || '#888888';
-    
-    // Build the basic details HTML
-    currentQuest.innerHTML = `
-        <div class="quest-details">
-            <div class="quest-type-banner-large" style="background-color: ${questColor}"></div>
-            
-            <div class="quest-header">
-                <div>
-                    <h2 class="quest-title">${quest.questName}</h2>
-                    <p class="quest-meta">
-                        Stage ${quest.stageId || '?'}: ${quest.stageName || 'Unknown'} • 
-                        <span class="quest-type-text" style="color: ${questColor}">${quest.type}</span>
-                        ${completionCount > 0 ? `
-                            <span class="completed-text">
-                                • Completed ${completionCount} time${completionCount > 1 ? 's' : ''}
-                            </span>
-                        ` : ''}
-                    </p>
-                </div>
-                ${quest.diceRequired ? `
-                    <div class="quest-dice-required">
-                        <span>🎲</span>
-                        Dice Roll Required
+    // Enhanced quest display functions
+    showQuestDetails(quest) {
+        const questList = document.getElementById('quest-list');
+        const currentQuest = document.getElementById('current-quest');
+        
+        if (!questList || !currentQuest) return;
+        
+        // Get completion info
+        const state = store.getState();
+        const completions = state.completedQuests.filter(c => c.questId === quest.id);
+        const completionCount = completions.length;
+        
+        // Show quest details, hide list
+        questList.classList.add('hidden');
+        currentQuest.classList.remove('hidden');
+        
+        // Update current quest in state
+        store.updateState('currentQuest', quest.id);
+        
+        // Quest type color
+        const questColor = QUEST_TYPE_COLORS[quest.type] || '#888888';
+        
+        // Build the basic details HTML
+        currentQuest.innerHTML = `
+            <div class="quest-details">
+                <div class="quest-type-banner-large" style="background-color: ${questColor}"></div>
+                
+                <div class="quest-header">
+                    <div>
+                        <h2 class="quest-title">${quest.questName}</h2>
+                        <p class="quest-meta">
+                            Stage ${quest.stageId || '?'}: ${quest.stageName || 'Unknown'} • 
+                            <span class="quest-type-text" style="color: ${questColor}">${quest.type}</span>
+                            ${completionCount > 0 ? `
+                                <span class="completed-text">
+                                    • Completed ${completionCount} time${completionCount > 1 ? 's' : ''}
+                                </span>
+                            ` : ''}
+                        </p>
                     </div>
-                ` : ''}
-            </div>
-            
-            <div class="quest-description">
-                <p>${quest.description}</p>
-            </div>
-            
-            <div class="quest-focus-grid">
-                <div class="focus-box primary">
-                    <p class="focus-label">Primary Focus</p>
-                    <p class="focus-value">${quest.primaryFocus} • ${quest.primaryHours}h</p>
+                    ${quest.diceRequired ? `
+                        <div class="quest-dice-required">
+                            <span>🎲</span>
+                            Dice Roll Required
+                        </div>
+                    ` : ''}
                 </div>
-                <div class="focus-box secondary">
-                    <p class="focus-label">Secondary Focus</p>
-                    <p class="focus-value">${quest.secondaryFocus} • ${quest.secondaryHours}h</p>
+                
+                <div class="quest-description">
+                    <p>${quest.description}</p>
+                </div>
+                
+                <div class="quest-focus-grid">
+                    <div class="focus-box primary">
+                        <p class="focus-label">Primary Focus</p>
+                        <p class="focus-value">${quest.primaryFocus} • ${quest.primaryHours}h</p>
+                    </div>
+                    <div class="focus-box secondary">
+                        <p class="focus-label">Secondary Focus</p>
+                        <p class="focus-value">${quest.secondaryFocus} • ${quest.secondaryHours}h</p>
+                    </div>
+                </div>
+                
+                ${this.buildDetailedQuestContent(quest)}
+                
+                ${quest.diceRequired ? this.buildDiceRollSection(quest) : ''}
+                
+                <div class="quest-screen-actions">
+                    <button id="back-to-quest-list" class="quest-button secondary">
+                        Back to Quest List
+                    </button>
+                    <button id="start-quest-button" class="quest-button primary">
+                        ${quest.diceRequired && !this.hasRolledDice(quest.id) 
+                            ? 'Roll Dice & Start Quest' 
+                            : 'Start Quest'}
+                    </button>
                 </div>
             </div>
-            
-            ${this.buildDetailedQuestContent(quest)}
-            
-            ${quest.diceRequired ? this.buildDiceRollSection(quest) : ''}
-            
-            <div class="quest-screen-actions">
-                <button id="back-to-quest-list" class="quest-button secondary">
-                    Back to Quest List
-                </button>
-                <button id="start-quest-button" class="quest-button primary">
-                    ${quest.diceRequired && !this.hasRolledDice(quest.id) 
-                        ? 'Roll Dice & Start Quest' 
-                        : 'Start Quest'}
-                </button>
-            </div>
-        </div>
-    `;
-    
-    // Add event listeners
-    document.getElementById('back-to-quest-list').addEventListener('click', () => {
-        this.showQuestList();
-    });
-    
-    document.getElementById('start-quest-button').addEventListener('click', () => {
-        if (quest.diceRequired && !this.hasRolledDice(quest.id)) {
-            this.rollDiceForQuest(quest);
-        } else {
-            this.showCookingMode(quest);
-        }
-    });
-    
-    // Add expand/collapse functionality to sections
-    document.querySelectorAll('.section-header').forEach(header => {
-        header.addEventListener('click', () => {
-            const content = header.nextElementSibling;
-            content.classList.toggle('collapsed');
-            header.classList.toggle('collapsed');
+        `;
+        
+        // Add event listeners
+        document.getElementById('back-to-quest-list').addEventListener('click', () => {
+            this.showQuestList();
         });
-    });
-},
+        
+        document.getElementById('start-quest-button').addEventListener('click', () => {
+            if (quest.diceRequired && !this.hasRolledDice(quest.id)) {
+                this.rollDiceForQuest(quest);
+            } else {
+                this.showCookingMode(quest);
+            }
+        });
+        
+        // Add expand/collapse functionality to sections
+        document.querySelectorAll('.section-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                content.classList.toggle('collapsed');
+                header.classList.toggle('collapsed');
+            });
+        });
+    },
 
-// Build the enhanced content sections
-buildDetailedQuestContent(quest) {
-    if (!quest.learningObjectives && !quest.equipmentNeeded && !quest.contentSections) {
-        return ''; // No enhanced content available
-    }
+    // Helper function to check if dice have been rolled
+    hasRolledDice(questId) {
+        const state = store.getState();
+        return state.questRolls && state.questRolls[questId];
+    },
     
-    let html = '<div class="detailed-quest-content">';
-    
-    // Learning Objectives
-    if (quest.learningObjectives && quest.learningObjectives.length > 0) {
-        html += `
-            <div class="quest-section">
-                <h3 class="section-header">Learning Objectives</h3>
-                <div class="section-content">
-                    <ul class="objective-list">
-                        ${quest.learningObjectives.map(obj => `<li>${obj}</li>`).join('')}
+    // Build dice roll section (add this function if not present)
+    buildDiceRollSection(quest) {
+        // Return empty if dice not required
+        if (!quest.diceRequired) return '';
+        
+        const state = store.getState();
+        const rolls = state.questRolls && state.questRolls[quest.id];
+        
+        if (rolls) {
+            // Show existing roll results
+            return `
+                <div class="dice-roll-section">
+                    <h4>Your Dice Roll Results:</h4>
+                    <ul class="dice-results">
+                        ${Object.entries(rolls).map(([key, value]) => `
+                            <li><strong>${key}:</strong> ${value}</li>
+                        `).join('')}
                     </ul>
                 </div>
+            `;
+        }
+        
+        // Placeholder for future roll
+        return `
+            <div class="dice-roll-section">
+                <h4>Dice Roll Required</h4>
+                <p>This quest uses dice mechanics to add variety to your cooking experience. 
+                Click "Roll Dice & Start Quest" to generate your unique combination.</p>
             </div>
         `;
-    }
-    
-    // Equipment Needed
-    if (quest.equipmentNeeded && quest.equipmentNeeded.length > 0) {
-        html += `
-            <div class="quest-section">
-                <h3 class="section-header">Equipment Needed</h3>
-                <div class="section-content">
-                    <ul class="equipment-list">
-                        ${quest.equipmentNeeded.map(item => `<li>${item}</li>`).join('')}
-                    </ul>
+    },
+
+    // Build the enhanced content sections
+    buildDetailedQuestContent(quest) {
+        if (!quest.learningObjectives && !quest.equipmentNeeded && !quest.contentSections) {
+            return ''; // No enhanced content available
+        }
+        
+        let html = '<div class="detailed-quest-content">';
+        
+        // Learning Objectives
+        if (quest.learningObjectives && quest.learningObjectives.length > 0) {
+            html += `
+                <div class="quest-section">
+                    <h3 class="section-header">Learning Objectives</h3>
+                    <div class="section-content">
+                        <ul class="objective-list">
+                            ${quest.learningObjectives.map(obj => `<li>${obj}</li>`).join('')}
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        `;
-    }
-    
-    // Content Sections
-    if (quest.contentSections && quest.contentSections.length > 0) {
-        html += `
-            <div class="quest-section">
-                <h3 class="section-header">Instructions</h3>
-                <div class="section-content">
-                    ${quest.contentSections.map(section => `
-                        <div class="content-section">
-                            <h4 class="content-section-title">${section.title}</h4>
-                            ${section.subsections.map(subsection => `
-                                <div class="content-subsection">
-                                    <h5 class="subsection-title">${subsection.subtitle}</h5>
-                                    <div class="subsection-content">
-                                        <p>${subsection.content}</p>
+            `;
+        }
+        
+        // Equipment Needed
+        if (quest.equipmentNeeded && quest.equipmentNeeded.length > 0) {
+            html += `
+                <div class="quest-section">
+                    <h3 class="section-header">Equipment Needed</h3>
+                    <div class="section-content">
+                        <ul class="equipment-list">
+                            ${quest.equipmentNeeded.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Content Sections
+        if (quest.contentSections && quest.contentSections.length > 0) {
+            html += `
+                <div class="quest-section">
+                    <h3 class="section-header">Instructions</h3>
+                    <div class="section-content">
+                        ${quest.contentSections.map(section => `
+                            <div class="content-section">
+                                <h4 class="content-section-title">${section.title}</h4>
+                                ${section.subsections.map(subsection => `
+                                    <div class="content-subsection">
+                                        <h5 class="subsection-title">${subsection.subtitle}</h5>
+                                        <div class="subsection-content">
+                                            <p>${subsection.content}</p>
+                                        </div>
                                     </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Practical Exercises
+        if (quest.practicalExercises && quest.practicalExercises.length > 0) {
+            html += `
+                <div class="quest-section">
+                    <h3 class="section-header">Practical Exercises</h3>
+                    <div class="section-content">
+                        ${quest.practicalExercises.map(exercise => `
+                            <div class="exercise">
+                                <h4 class="exercise-title">${exercise.title}</h4>
+                                <ol class="exercise-steps">
+                                    ${exercise.steps.map(step => `<li>${step}</li>`).join('')}
+                                </ol>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Tips for Success
+        if (quest.tipsForSuccess && quest.tipsForSuccess.length > 0) {
+            html += `
+                <div class="quest-section">
+                    <h3 class="section-header">Tips for Success</h3>
+                    <div class="section-content">
+                        <ul class="tips-list">
+                            ${quest.tipsForSuccess.map(tip => `<li>${tip}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Completion Checklist
+        if (quest.completionChecklist && quest.completionChecklist.length > 0) {
+            html += `
+                <div class="quest-section">
+                    <h3 class="section-header">Completion Checklist</h3>
+                    <div class="section-content">
+                        <div class="checklist">
+                            ${quest.completionChecklist.map(item => `
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="check-${item.replace(/\s+/g, '-')}" class="checklist-checkbox">
+                                    <label for="check-${item.replace(/\s+/g, '-')}">${item}</label>
                                 </div>
                             `).join('')}
                         </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-    
-    // Practical Exercises
-    if (quest.practicalExercises && quest.practicalExercises.length > 0) {
-        html += `
-            <div class="quest-section">
-                <h3 class="section-header">Practical Exercises</h3>
-                <div class="section-content">
-                    ${quest.practicalExercises.map(exercise => `
-                        <div class="exercise">
-                            <h4 class="exercise-title">${exercise.title}</h4>
-                            <ol class="exercise-steps">
-                                ${exercise.steps.map(step => `<li>${step}</li>`).join('')}
-                            </ol>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-    
-    // Tips for Success
-    if (quest.tipsForSuccess && quest.tipsForSuccess.length > 0) {
-        html += `
-            <div class="quest-section">
-                <h3 class="section-header">Tips for Success</h3>
-                <div class="section-content">
-                    <ul class="tips-list">
-                        ${quest.tipsForSuccess.map(tip => `<li>${tip}</li>`).join('')}
-                    </ul>
-                </div>
-            </div>
-        `;
-    }
-    
-    // Completion Checklist
-    if (quest.completionChecklist && quest.completionChecklist.length > 0) {
-        html += `
-            <div class="quest-section">
-                <h3 class="section-header">Completion Checklist</h3>
-                <div class="section-content">
-                    <div class="checklist">
-                        ${quest.completionChecklist.map(item => `
-                            <div class="checklist-item">
-                                <input type="checkbox" id="check-${item.replace(/\s+/g, '-')}" class="checklist-checkbox">
-                                <label for="check-${item.replace(/\s+/g, '-')}">${item}</label>
-                            </div>
-                        `).join('')}
                     </div>
                 </div>
-            </div>
-        `;
-    }
-    
-    html += '</div>';
-    return html;
-},
-
-// Enhanced cooking mode to include step-by-step guidance
-showCookingMode(quest) {
-    const currentQuest = document.getElementById('current-quest');
-    if (!currentQuest) return;
-    
-    // Get dice rolls if applicable
-    const state = store.getState();
-    const rolls = state.questRolls && state.questRolls[quest.id] || {};
-    
-    // Prepare cooking steps
-    let steps = [];
-    
-    // Use the contentSections from enhanced quest data if available
-    if (quest.contentSections && quest.contentSections.length > 0) {
-        // Transform content sections into cooking steps
-        steps = quest.contentSections.map(section => {
-            return {
-                title: section.title,
-                instructions: section.subsections.map(subsection => subsection.subtitle)
-            };
-        });
-    } else {
-        // Fallback to generic steps based on quest type
-        if (quest.type === 'Main') {
-            steps = [
-                { title: 'Preparation', instructions: ['Gather all ingredients', 'Prepare your workspace'] },
-                { title: 'Main Step', instructions: ['Follow the recipe guidelines'] },
-                { title: 'Completion', instructions: ['Plate your dish', 'Clean your workspace'] }
-            ];
-        } else if (quest.type === 'Side') {
-            steps = [
-                { title: 'Preparation', instructions: ['Gather all ingredients'] },
-                { title: 'Cooking', instructions: ['Follow the recipe guidelines'] }
-            ];
-        } else {
-            steps = [
-                { title: 'Preparation', instructions: ['Get ready for the training exercise'] },
-                { title: 'Practice', instructions: ['Practice the technique described'] }
-            ];
+            `;
         }
-    }
-    
-    // Show cooking mode UI
-    currentQuest.innerHTML = `
-        <div class="cooking-mode">
-            <div class="cooking-header">
-                <h2>${quest.questName}</h2>
-                <p>Follow these steps to complete your quest</p>
-            </div>
-            
-            ${Object.keys(rolls).length > 0 ? `
-                <div class="roll-results">
-                    <h3>Your Roll Results:</h3>
-                    <ul>
-                        ${Object.entries(rolls).map(([key, value]) => 
-                            `<li><strong>${key}:</strong> ${value}</li>`
-                        ).join('')}
-                    </ul>
-                </div>
-            ` : ''}
-            
-            <div class="cooking-steps-container">
-                <div class="cooking-steps-nav">
-                    ${steps.map((step, index) => `
-                        <div class="step-nav-item" data-step="${index}">
-                            <div class="step-number">${index + 1}</div>
-                            <div class="step-nav-title">${step.title}</div>
-                        </div>
-                    `).join('')}
+        
+        html += '</div>';
+        return html;
+    },
+
+    // Enhanced cooking mode to include step-by-step guidance
+    showCookingMode(quest) {
+        const currentQuest = document.getElementById('current-quest');
+        if (!currentQuest) return;
+        
+        // Get dice rolls if applicable
+        const state = store.getState();
+        const rolls = state.questRolls && state.questRolls[quest.id] || {};
+        
+        // Prepare cooking steps
+        let steps = [];
+        
+        // Use the contentSections from enhanced quest data if available
+        if (quest.contentSections && quest.contentSections.length > 0) {
+            // Transform content sections into cooking steps
+            steps = quest.contentSections.map(section => {
+                return {
+                    title: section.title,
+                    instructions: section.subsections.map(subsection => subsection.subtitle)
+                };
+            });
+        } else {
+            // Fallback to generic steps based on quest type
+            if (quest.type === 'Main') {
+                steps = [
+                    { title: 'Preparation', instructions: ['Gather all ingredients', 'Prepare your workspace'] },
+                    { title: 'Main Step', instructions: ['Follow the recipe guidelines'] },
+                    { title: 'Completion', instructions: ['Plate your dish', 'Clean your workspace'] }
+                ];
+            } else if (quest.type === 'Side') {
+                steps = [
+                    { title: 'Preparation', instructions: ['Gather all ingredients'] },
+                    { title: 'Cooking', instructions: ['Follow the recipe guidelines'] }
+                ];
+            } else {
+                steps = [
+                    { title: 'Preparation', instructions: ['Get ready for the training exercise'] },
+                    { title: 'Practice', instructions: ['Practice the technique described'] }
+                ];
+            }
+        }
+        
+        // Show cooking mode UI
+        currentQuest.innerHTML = `
+            <div class="cooking-mode">
+                <div class="cooking-header">
+                    <h2>${quest.questName}</h2>
+                    <p>Follow these steps to complete your quest</p>
                 </div>
                 
-                <div class="cooking-steps-content">
-                    ${steps.map((step, index) => `
-                        <div class="cooking-step" data-step="${index}" ${index > 0 ? 'style="display: none;"' : ''}>
-                            <h3>Step ${index + 1}: ${step.title}</h3>
-                            <div class="step-instructions">
-                                <ul>
-                                    ${step.instructions.map(instruction => 
-                                        `<li class="instruction-item">
-                                            <input type="checkbox" class="instruction-checkbox">
-                                            <span class="instruction-text">${instruction}</span>
-                                        </li>`
-                                    ).join('')}
-                                </ul>
+                ${Object.keys(rolls).length > 0 ? `
+                    <div class="roll-results">
+                        <h3>Your Roll Results:</h3>
+                        <ul>
+                            ${Object.entries(rolls).map(([key, value]) => 
+                                `<li><strong>${key}:</strong> ${value}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                
+                <div class="cooking-steps-container">
+                    <div class="cooking-steps-nav">
+                        ${steps.map((step, index) => `
+                            <div class="step-nav-item" data-step="${index}">
+                                <div class="step-number">${index + 1}</div>
+                                <div class="step-nav-title">${step.title}</div>
                             </div>
-                            
-                            ${index < steps.length - 1 ? `
-                                <button class="next-step-button quest-button primary">Next Step</button>
-                            ` : ''}
-                            
-                            ${index > 0 ? `
-                                <button class="prev-step-button quest-button secondary">Previous Step</button>
-                            ` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-            
-            <div class="cooking-actions">
-                <button id="back-to-details" class="quest-button secondary">Back to Details</button>
-                <button id="complete-quest" class="quest-button primary">Complete Quest</button>
-            </div>
-        </div>
-    `;
-    
-    // Add event listeners
-    document.getElementById('back-to-details').addEventListener('click', () => {
-        this.showQuestDetails(quest);
-    });
-    
-    document.getElementById('complete-quest').addEventListener('click', () => {
-        this.showCompletionScreen(quest);
-    });
-    
-    // Add navigation functionality
-    document.querySelectorAll('.next-step-button').forEach(button => {
-        button.addEventListener('click', () => {
-            const currentStep = button.closest('.cooking-step');
-            const stepIndex = parseInt(currentStep.dataset.step);
-            const nextStep = document.querySelector(`.cooking-step[data-step="${stepIndex + 1}"]`);
-            
-            currentStep.style.display = 'none';
-            nextStep.style.display = 'block';
-            
-            // Update nav highlight
-            document.querySelectorAll('.step-nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            document.querySelector(`.step-nav-item[data-step="${stepIndex + 1}"]`).classList.add('active');
-        });
-    });
-    
-    document.querySelectorAll('.prev-step-button').forEach(button => {
-        button.addEventListener('click', () => {
-            const currentStep = button.closest('.cooking-step');
-            const stepIndex = parseInt(currentStep.dataset.step);
-            const prevStep = document.querySelector(`.cooking-step[data-step="${stepIndex - 1}"]`);
-            
-            currentStep.style.display = 'none';
-            prevStep.style.display = 'block';
-            
-            // Update nav highlight
-            document.querySelectorAll('.step-nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            document.querySelector(`.step-nav-item[data-step="${stepIndex - 1}"]`).classList.add('active');
-        });
-    });
-    
-    // Make step nav items clickable
-    document.querySelectorAll('.step-nav-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const stepIndex = parseInt(item.dataset.step);
-            
-            // Hide all steps
-            document.querySelectorAll('.cooking-step').forEach(step => {
-                step.style.display = 'none';
-            });
-            
-            // Show selected step
-            document.querySelector(`.cooking-step[data-step="${stepIndex}"]`).style.display = 'block';
-            
-            // Update nav highlight
-            document.querySelectorAll('.step-nav-item').forEach(navItem => {
-                navItem.classList.remove('active');
-            });
-            item.classList.add('active');
-        });
-    });
-    
-    // Highlight first step nav item
-    document.querySelector('.step-nav-item[data-step="0"]').classList.add('active');
-},
-    
-// Enhanced completion screen with checklist review
-showCompletionScreen(quest) {
-    // Honor system completion
-    const currentQuest = document.getElementById('current-quest');
-    if (!currentQuest) return;
-    
-    // Get completion checklist
-    const checklist = quest.completionChecklist || [];
-    
-    currentQuest.innerHTML = `
-        <div class="quest-completion">
-            <h2>Quest Complete: ${quest.questName}</h2>
-            
-            <div class="completion-assessment">
-                <h3>How did it go?</h3>
-                
-                <div class="completion-options">
-                    <label class="completion-option">
-                        <input type="radio" name="completion-level" value="mastered" checked>
-                        <span>Mastered it! (100% reward)</span>
-                    </label>
+                        `).join('')}
+                    </div>
                     
-                    <label class="completion-option">
-                        <input type="radio" name="completion-level" value="wellDone">
-                        <span>Did well, need practice (80% reward)</span>
-                    </label>
-                    
-                    <label class="completion-option">
-                        <input type="radio" name="completion-level" value="struggled">
-                        <span>Struggled but completed (60% reward)</span>
-                    </label>
-                </div>
-            </div>
-            
-            ${checklist.length > 0 ? `
-                <div class="completion-checklist">
-                    <h3>Completion Checklist Review</h3>
-                    <p>Check off the items you completed:</p>
-                    <div class="checklist-review">
-                        ${checklist.map((item, index) => `
-                            <div class="checklist-review-item">
-                                <input type="checkbox" id="complete-check-${index}" class="checklist-checkbox">
-                                <label for="complete-check-${index}">${item}</label>
+                    <div class="cooking-steps-content">
+                        ${steps.map((step, index) => `
+                            <div class="cooking-step" data-step="${index}" ${index > 0 ? 'style="display: none;"' : ''}>
+                                <h3>Step ${index + 1}: ${step.title}</h3>
+                                <div class="step-instructions">
+                                    <ul>
+                                        ${step.instructions.map(instruction => 
+                                            `<li class="instruction-item">
+                                                <input type="checkbox" class="instruction-checkbox">
+                                                <span class="instruction-text">${instruction}</span>
+                                            </li>`
+                                        ).join('')}
+                                    </ul>
+                                </div>
+                                
+                                ${index < steps.length - 1 ? `
+                                    <button class="next-step-button quest-button primary">Next Step</button>
+                                ` : ''}
+                                
+                                ${index > 0 ? `
+                                    <button class="prev-step-button quest-button secondary">Previous Step</button>
+                                ` : ''}
                             </div>
                         `).join('')}
                     </div>
                 </div>
-            ` : ''}
-            
-            <div class="completion-notes">
-                <h3>Notes (optional):</h3>
-                <textarea id="completion-notes" placeholder="Add your reflections here..."></textarea>
+                
+                <div class="cooking-actions">
+                    <button id="back-to-details" class="quest-button secondary">Back to Details</button>
+                    <button id="complete-quest" class="quest-button primary">Complete Quest</button>
+                </div>
             </div>
-            
-            <div class="completion-actions">
-                <button id="back-to-cooking" class="quest-button secondary">Back</button>
-                <button id="confirm-completion" class="quest-button primary">Confirm Completion</button>
-            </div>
-        </div>
-    `;
-    
-    // Add event listeners
-    document.getElementById('back-to-cooking').addEventListener('click', () => {
-        this.showCookingMode(quest);
-    });
-    
-    document.getElementById('confirm-completion').addEventListener('click', () => {
-        const completionLevel = document.querySelector('input[name="completion-level"]:checked').value;
-        const notes = document.getElementById('completion-notes').value;
+        `;
         
-        // Gather checked items from checklist
-        const checkedItems = [];
-        document.querySelectorAll('.checklist-review-item input:checked').forEach(checkbox => {
-            const label = checkbox.nextElementSibling.textContent;
-            checkedItems.push(label);
+        // Add event listeners
+        document.getElementById('back-to-details').addEventListener('click', () => {
+            this.showQuestDetails(quest);
         });
         
-        this.completeQuest(quest, completionLevel, notes, checkedItems);
-    });
-},
+        document.getElementById('complete-quest').addEventListener('click', () => {
+            this.showCompletionScreen(quest);
+        });
+        
+        // Add navigation functionality
+        document.querySelectorAll('.next-step-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const currentStep = button.closest('.cooking-step');
+                const stepIndex = parseInt(currentStep.dataset.step);
+                const nextStep = document.querySelector(`.cooking-step[data-step="${stepIndex + 1}"]`);
+                
+                currentStep.style.display = 'none';
+                nextStep.style.display = 'block';
+                
+                // Update nav highlight
+                document.querySelectorAll('.step-nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`.step-nav-item[data-step="${stepIndex + 1}"]`).classList.add('active');
+            });
+        });
+        
+        document.querySelectorAll('.prev-step-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const currentStep = button.closest('.cooking-step');
+                const stepIndex = parseInt(currentStep.dataset.step);
+                const prevStep = document.querySelector(`.cooking-step[data-step="${stepIndex - 1}"]`);
+                
+                currentStep.style.display = 'none';
+                prevStep.style.display = 'block';
+                
+                // Update nav highlight
+                document.querySelectorAll('.step-nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`.step-nav-item[data-step="${stepIndex - 1}"]`).classList.add('active');
+            });
+        });
+        
+        // Make step nav items clickable
+        document.querySelectorAll('.step-nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const stepIndex = parseInt(item.dataset.step);
+                
+                // Hide all steps
+                document.querySelectorAll('.cooking-step').forEach(step => {
+                    step.style.display = 'none';
+                });
+                
+                // Show selected step
+                document.querySelector(`.cooking-step[data-step="${stepIndex}"]`).style.display = 'block';
+                
+                // Update nav highlight
+                document.querySelectorAll('.step-nav-item').forEach(navItem => {
+                    navItem.classList.remove('active');
+                });
+                item.classList.add('active');
+            });
+        });
+        
+        // Highlight first step nav item
+        document.querySelector('.step-nav-item[data-step="0"]').classList.add('active');
+    },
+    
+    // Enhanced completion screen with checklist review
+    showCompletionScreen(quest) {
+        // Honor system completion
+        const currentQuest = document.getElementById('current-quest');
+        if (!currentQuest) return;
+        
+        // Get completion checklist
+        const checklist = quest.completionChecklist || [];
+        
+        currentQuest.innerHTML = `
+            <div class="quest-completion">
+                <h2>Quest Complete: ${quest.questName}</h2>
+                
+                <div class="completion-assessment">
+                    <h3>How did it go?</h3>
+                    
+                    <div class="completion-options">
+                        <label class="completion-option">
+                            <input type="radio" name="completion-level" value="mastered" checked>
+                            <span>Mastered it! (100% reward)</span>
+                        </label>
+                        
+                        <label class="completion-option">
+                            <input type="radio" name="completion-level" value="wellDone">
+                            <span>Did well, need practice (80% reward)</span>
+                        </label>
+                        
+                        <label class="completion-option">
+                            <input type="radio" name="completion-level" value="struggled">
+                            <span>Struggled but completed (60% reward)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                ${checklist.length > 0 ? `
+                    <div class="completion-checklist">
+                        <h3>Completion Checklist Review</h3>
+                        <p>Check off the items you completed:</p>
+                        <div class="checklist-review">
+                            ${checklist.map((item, index) => `
+                                <div class="checklist-review-item">
+                                    <input type="checkbox" id="complete-check-${index}" class="checklist-checkbox">
+                                    <label for="complete-check-${index}">${item}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="completion-notes">
+                    <h3>Notes (optional):</h3>
+                    <textarea id="completion-notes" placeholder="Add your reflections here..."></textarea>
+                </div>
+                
+                <div class="completion-actions">
+                    <button id="back-to-cooking" class="quest-button secondary">Back</button>
+                    <button id="confirm-completion" class="quest-button primary">Confirm Completion</button>
+                </div>
+            </div>
+        `;
+        
+        // Add event listeners
+        document.getElementById('back-to-cooking').addEventListener('click', () => {
+            this.showCookingMode(quest);
+        });
+        
+        document.getElementById('confirm-completion').addEventListener('click', () => {
+            const completionLevel = document.querySelector('input[name="completion-level"]:checked').value;
+            const notes = document.getElementById('completion-notes').value;
+            
+            // Gather checked items from checklist
+            const checkedItems = [];
+            document.querySelectorAll('.checklist-review-item input:checked').forEach(checkbox => {
+                const label = checkbox.nextElementSibling.textContent;
+                checkedItems.push(label);
+            });
+            
+            this.completeQuest(quest, completionLevel, notes, checkedItems);
+        });
+    },
+    
+    // Roll dice for quest function (assume this is implemented elsewhere)
+    rollDiceForQuest(quest) {
+        // Implementation would go here
+        // For now, let's just simulate dice rolling
+        console.log(`Rolling dice for quest: ${quest.id}`);
+        
+        // After rolling, update state and show cooking mode
+        this.showCookingMode(quest);
+    },
     
     completeQuest(quest, completionLevel = 'mastered', notes = '') {
         // Calculate rewards based on completion level
@@ -782,45 +867,44 @@ showCompletionScreen(quest) {
             `attributeHours.${secondaryAttr}`, 
             (state.attributeHours[secondaryAttr] || 0) + secondaryHours
         );
-
+        
         // Check if this is a milestone quest
-    if (quest.milestone === true && quest.unlocksStage) {
-        console.log(`Milestone quest completed, unlocking Stage ${quest.unlocksStage}`);
-        
-        // Find all quests from the next stage
-        const nextStageQuests = QUEST_DATA.filter(q => q.stageId === quest.unlocksStage);
-        
-        // Make sure we have quests for the next stage
-        if (nextStageQuests.length > 0) {
-            // Get current visible quests
-            const state = store.getState();
-            const visibleQuestIds = new Set(state.visibleQuests || []);
+        if (quest.milestone === true && quest.unlocksStage) {
+            console.log(`Milestone quest completed, unlocking Stage ${quest.unlocksStage}`);
             
-            // Add next stage quests to visible quests
-            let newlyUnlockedCount = 0;
-            nextStageQuests.forEach(q => {
-                if (!visibleQuestIds.has(q.id)) {
-                    visibleQuestIds.add(q.id);
-                    newlyUnlockedCount++;
-                }
-            });
+            // Find all quests from the next stage
+            const nextStageQuests = QUEST_DATA.filter(q => q.stageId === quest.unlocksStage);
             
-            // Update state only if we added new quests
-            if (newlyUnlockedCount > 0) {
-                store.updateState('visibleQuests', Array.from(visibleQuestIds));
+            // Make sure we have quests for the next stage
+            if (nextStageQuests.length > 0) {
+                // Get current visible quests
+                const state = store.getState();
+                const visibleQuestIds = new Set(state.visibleQuests || []);
                 
-                // Show notification to user (if you have a notification system)
-                if (quest.unlockMessage) {
-                    console.log(quest.unlockMessage);
-                    // If you have a notification system:
-                    // notificationSystem.show(quest.unlockMessage);
+                // Add next stage quests to visible quests
+                let newlyUnlockedCount = 0;
+                nextStageQuests.forEach(q => {
+                    if (!visibleQuestIds.has(q.id)) {
+                        visibleQuestIds.add(q.id);
+                        newlyUnlockedCount++;
+                    }
+                });
+                
+                // Update state only if we added new quests
+                if (newlyUnlockedCount > 0) {
+                    store.updateState('visibleQuests', Array.from(visibleQuestIds));
+                    
+                    // Show notification to user (if you have a notification system)
+                    if (quest.unlockMessage) {
+                        console.log(quest.unlockMessage);
+                        // If you have a notification system:
+                        // notificationSystem.show(quest.unlockMessage);
+                    }
                 }
+            } else {
+                console.log(`No quests found for Stage ${quest.unlocksStage}`);
             }
-        } else {
-            console.log(`No quests found for Stage ${quest.unlocksStage}`);
         }
-    }
-}
         
         // Unlock new quests
         this.unlockNewQuests(quest);
