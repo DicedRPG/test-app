@@ -405,6 +405,9 @@ const QUEST_DATA = [
     description: "Research and understand essential kitchen tools and equipment",
     stageId: 1,
     stageName: "Kitchen Fundamentals",
+    milestone: true,
+      unlocksStage: 2,
+      unlockMessage: "Stage 2: Knife Skills & Heat Control is now available!",
     learningObjectives: [
       "Understand the function and purpose of essential kitchen tools",
       "Learn to evaluate quality and value in kitchen equipment",
