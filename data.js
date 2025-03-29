@@ -322,7 +322,7 @@ const QUEST_DATA = [
       "A digital scale dramatically improves measurement accuracy",
       "Create a personal reference sheet for common conversions"
     ]
-  }
+  },
   {
     id: 103,
     questName: "Basic Cookbook Research",
